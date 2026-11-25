@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merayau Outdoor Portal Admin Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: #f8fafc;
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 1.75rem;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .pulse-dot {
+      width: 11px;
+      height: 11px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-left: 1.55rem;
+    }
+
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.55);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+      overflow-x: auto;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 960px;
+      display: block;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.55);
+      border-radius: 0.75rem;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .card ul {
+      list-style: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    .card li {
+      margin-bottom: 0.375rem;
+      line-height: 1.45;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #64748b;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Merayau Outdoor · Portal Admin Architecture (Fase 1)</h1>
+      </div>
+      <p class="subtitle">Nuxt 4 Full-Stack (Vue 3 SSR/SPA + Nitro Server) · MariaDB 11 / Drizzle ORM · Editorial Warm Paper</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1120 710" role="img" aria-label="Arsitektur Portal Admin Merayau Outdoor">
+        <defs>
+          <marker id="arrow-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+          </marker>
+          <marker id="arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+          </marker>
+          <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+          </marker>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24" />
+          </marker>
+          <marker id="arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa" />
+          </marker>
+          <marker id="arrow-slate" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5" />
+          </pattern>
+        </defs>
+
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Outer application host boundary -->
+        <rect x="200" y="36" width="900" height="584" rx="12" fill="rgba(15, 23, 42, 0.25)" stroke="#334155" stroke-width="1" stroke-dasharray="8,4" />
+        <text x="216" y="56" fill="#94a3b8" font-size="10" font-weight="600">NUXT 4 MONOREPO + DOCKER COMPOSE RUNTIME</text>
+
+        <!-- Security boundary around Auth + Admin APIs -->
+        <rect x="480" y="72" width="320" height="528" rx="10" fill="rgba(136, 19, 55, 0.06)" stroke="#fb7185" stroke-width="1" stroke-dasharray="4,4" />
+        <text x="494" y="90" fill="#fb7185" font-size="9" font-weight="600">AUTH GUARD · HttpOnly HMAC Cookie</text>
+
+        <!-- Arrows drawn early behind component boxes -->
+        <line x1="150" y1="210" x2="226" y2="210" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" />
+        <text x="188" y="202" fill="#94a3b8" font-size="8" text-anchor="middle">HTTP</text>
+
+        <path d="M 90 250 L 90 480 L 95 480" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" />
+        <line x1="330" y1="360" x2="330" y2="452" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-slate)" />
+        <text x="292" y="425" fill="#94a3b8" font-size="8">wa.me CTA</text>
+
+        <line x1="430" y1="145" x2="496" y2="145" stroke="#fb7185" stroke-width="1.5" marker-end="url(#arrow-rose)" />
+        <text x="463" y="138" fill="#fb7185" font-size="8" text-anchor="middle">Cookie</text>
+
+        <line x1="430" y1="265" x2="496" y2="265" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" />
+        <text x="463" y="257" fill="#94a3b8" font-size="8" text-anchor="middle">JSON</text>
+
+        <line x1="430" y1="375" x2="496" y2="375" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)" />
+        <text x="463" y="367" fill="#94a3b8" font-size="8" text-anchor="middle">Zod</text>
+
+        <line x1="430" y1="490" x2="496" y2="490" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-amber)" />
+        <text x="463" y="482" fill="#fbbf24" font-size="8" text-anchor="middle">2MB Img</text>
+
+        <line x1="780" y1="145" x2="846" y2="190" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-violet)" />
+        <line x1="780" y1="265" x2="846" y2="245" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-violet)" />
+        <line x1="780" y1="375" x2="846" y2="315" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow-violet)" />
+        <text x="815" y="250" fill="#a78bfa" font-size="8" text-anchor="middle">FOR</text>
+        <text x="815" y="261" fill="#a78bfa" font-size="8" text-anchor="middle">UPDATE</text>
+
+        <line x1="780" y1="490" x2="846" y2="490" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-amber)" />
+        <text x="813" y="482" fill="#fbbf24" font-size="8" text-anchor="middle">Disk I/O</text>
+
+        <!-- External: Admin Basecamp User -->
+        <rect x="30" y="170" width="120" height="80" rx="6" fill="#0f172a" />
+        <rect x="30" y="170" width="120" height="80" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5" />
+        <text x="90" y="198" fill="white" font-size="11" font-weight="600" text-anchor="middle">Admin Basecamp</text>
+        <text x="90" y="216" fill="#94a3b8" font-size="9" text-anchor="middle">Desktop / Tablet</text>
+        <text x="90" y="232" fill="#94a3b8" font-size="8" text-anchor="middle">Editorial Siang/Malam</text>
+
+        <!-- External: WhatsApp Deep Link -->
+        <rect x="230" y="456" width="190" height="62" rx="6" fill="#0f172a" />
+        <rect x="230" y="456" width="190" height="62" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5" />
+        <text x="325" y="480" fill="white" font-size="11" font-weight="600" text-anchor="middle">WhatsApp Web / App</text>
+        <text x="325" y="498" fill="#94a3b8" font-size="8.5" text-anchor="middle">wa.me/62... Pengingat Telat &amp; Trip</text>
+
+        <!-- Frontend Box: Nuxt 4 Portal Admin -->
+        <rect x="230" y="108" width="200" height="295" rx="8" fill="#0f172a" />
+        <rect x="230" y="108" width="200" height="295" rx="8" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5" />
+        <text x="330" y="132" fill="white" font-size="12" font-weight="600" text-anchor="middle">Nuxt 4 Portal Admin UI</text>
+        <text x="330" y="150" fill="#22d3ee" font-size="8.5" text-anchor="middle">Vue 3 + Tailwind Editorial</text>
+        <text x="244" y="174" fill="#cbd5e1" font-size="8.5">• /admin (Dashboard + Stok)</text>
+        <text x="244" y="192" fill="#cbd5e1" font-size="8.5">• /admin/sewa (Jaminan Dropdown)</text>
+        <text x="244" y="210" fill="#cbd5e1" font-size="8.5">• /admin/alat-disewa (WA Split)</text>
+        <text x="244" y="228" fill="#cbd5e1" font-size="8.5">• /admin/master-alat (+Foto)</text>
+        <text x="244" y="246" fill="#cbd5e1" font-size="8.5">• /admin/paket-alat (-30% Auto)</text>
+        <text x="244" y="264" fill="#cbd5e1" font-size="8.5">• /admin/paket-alat/tambah</text>
+        <text x="244" y="282" fill="#cbd5e1" font-size="8.5">• /admin/penyewa (NIK + History)</text>
+        <text x="244" y="300" fill="#cbd5e1" font-size="8.5">• /admin/data-trip (A/B/C+Mepo)</text>
+        <text x="244" y="318" fill="#cbd5e1" font-size="8.5">• /admin/peserta-trip (4 KPI)</text>
+        <text x="244" y="348" fill="#94a3b8" font-size="8">Vollkorn + Public Sans</text>
+        <text x="244" y="364" fill="#94a3b8" font-size="8">Global Route Guard Middleware</text>
+
+        <!-- Security: Auth Middleware + Login -->
+        <rect x="500" y="108" width="280" height="78" rx="6" fill="#0f172a" />
+        <rect x="500" y="108" width="280" height="78" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5" />
+        <text x="640" y="130" fill="white" font-size="11" font-weight="600" text-anchor="middle">Nitro Auth &amp; Session Guard</text>
+        <text x="640" y="148" fill="#fda4af" font-size="8.5" text-anchor="middle">scrypt Password + HMAC-SHA256</text>
+        <text x="640" y="165" fill="#94a3b8" font-size="8" text-anchor="middle">/api/auth/* · middleware/admin-auth.ts</text>
+
+        <!-- Backend: Core Business Logic APIs -->
+        <rect x="500" y="206" width="280" height="108" rx="6" fill="#0f172a" />
+        <rect x="500" y="206" width="280" height="108" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5" />
+        <text x="640" y="228" fill="white" font-size="11" font-weight="600" text-anchor="middle">Inventori, Paket &amp; Rental API</text>
+        <text x="514" y="248" fill="#cbd5e1" font-size="8">• /api/admin/dashboard, alat, kategori</text>
+        <text x="514" y="264" fill="#cbd5e1" font-size="8">• /api/admin/paket-alat (-30% server calc)</text>
+        <text x="514" y="280" fill="#cbd5e1" font-size="8">• /api/admin/transaksi (+FOR UPDATE lock)</text>
+        <text x="514" y="296" fill="#34d399" font-size="8">• Real-time stok = total - SUM(aktif)</text>
+
+        <!-- Backend: Trip & Peserta APIs -->
+        <rect x="500" y="330" width="280" height="96" rx="6" fill="#0f172a" />
+        <rect x="500" y="330" width="280" height="96" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5" />
+        <text x="640" y="352" fill="white" font-size="11" font-weight="600" text-anchor="middle">Open Trip &amp; Peserta API</text>
+        <text x="514" y="372" fill="#cbd5e1" font-size="8">• /api/admin/trips (Paket A/B/C + Mepo)</text>
+        <text x="514" y="388" fill="#cbd5e1" font-size="8">• /api/admin/peserta-trip (DP 50% KPI)</text>
+        <text x="514" y="404" fill="#34d399" font-size="8">• Auto Penuh kuota check in transaction</text>
+
+        <!-- Media Upload Endpoint -->
+        <rect x="500" y="446" width="280" height="82" rx="6" fill="#0f172a" />
+        <rect x="500" y="446" width="280" height="82" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5" />
+        <text x="640" y="468" fill="white" font-size="11" font-weight="600" text-anchor="middle">Media Upload &amp; Serving</text>
+        <text x="640" y="486" fill="#fcd34d" font-size="8.5" text-anchor="middle">POST /api/admin/upload (Magic Bytes)</text>
+        <text x="640" y="504" fill="#94a3b8" font-size="8" text-anchor="middle">GET /uploads/[...path] (JPG/PNG/WEBP &lt;=2MB)</text>
+
+        <!-- Database: MariaDB 11 + Drizzle ORM -->
+        <rect x="850" y="108" width="230" height="295" rx="8" fill="#0f172a" />
+        <rect x="850" y="108" width="230" height="295" rx="8" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5" />
+        <text x="965" y="132" fill="white" font-size="12" font-weight="600" text-anchor="middle">MariaDB 11 + Drizzle ORM</text>
+        <text x="965" y="150" fill="#c4b5fd" font-size="8.5" text-anchor="middle">13 Relational InnoDB Tables</text>
+        <text x="864" y="174" fill="#cbd5e1" font-size="8">1. admins · 6. pengaturan_sewa</text>
+        <text x="864" y="191" fill="#cbd5e1" font-size="8">2. kategori_alat · 3. master_alat</text>
+        <text x="864" y="208" fill="#cbd5e1" font-size="8">4. paket_alat · 5. paket_alat_item</text>
+        <text x="864" y="225" fill="#cbd5e1" font-size="8">7. penyewa · 8. transaksi_sewa</text>
+        <text x="864" y="242" fill="#cbd5e1" font-size="8">9. detail_sewa (FK id_paket?)</text>
+        <text x="864" y="259" fill="#cbd5e1" font-size="8">10. info_trip · 11. trip_paket</text>
+        <text x="864" y="276" fill="#cbd5e1" font-size="8">12. trip_meeting_point (is_custom)</text>
+        <text x="864" y="293" fill="#cbd5e1" font-size="8">13. peserta_trip (DP 50%/Lunas)</text>
+        <text x="864" y="330" fill="#a78bfa" font-size="8">Docker port 127.0.0.1:3307</text>
+        <text x="864" y="346" fill="#94a3b8" font-size="8">ACID Transaction + Row Locks</text>
+
+        <!-- Storage: Local Upload Volume -->
+        <rect x="850" y="446" width="230" height="82" rx="6" fill="#0f172a" />
+        <rect x="850" y="446" width="230" height="82" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5" />
+        <text x="965" y="468" fill="white" font-size="11" font-weight="600" text-anchor="middle">Local Disk Asset Store</text>
+        <text x="965" y="487" fill="#94a3b8" font-size="8.5" text-anchor="middle">public/uploads/alat | paket | trip</text>
+        <text x="965" y="505" fill="#fbbf24" font-size="8" text-anchor="middle">public/images/logo.jpeg</text>
+
+        <!-- Legend placed outside and below all boundary boxes (>= 20px gap below y=620) -->
+        <text x="200" y="655" fill="white" font-size="10" font-weight="600">Legend</text>
+
+        <rect x="200" y="668" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1" />
+        <text x="222" y="676" fill="#94a3b8" font-size="8.5">Frontend (Nuxt 4)</text>
+
+        <rect x="345" y="668" width="16" height="10" rx="2" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1" />
+        <text x="367" y="676" fill="#94a3b8" font-size="8.5">Auth &amp; Session Guard</text>
+
+        <rect x="515" y="668" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1" />
+        <text x="537" y="676" fill="#94a3b8" font-size="8.5">Nitro API Endpoints</text>
+
+        <rect x="680" y="668" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1" />
+        <text x="702" y="676" fill="#94a3b8" font-size="8.5">MariaDB 11 / Drizzle</text>
+
+        <rect x="850" y="668" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1" />
+        <text x="872" y="676" fill="#94a3b8" font-size="8.5">Upload Storage</text>
+
+        <rect x="985" y="668" width="16" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1" />
+        <text x="1007" y="676" fill="#94a3b8" font-size="8.5">External</text>
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot cyan"></div>
+          <h3>Portal Admin UI (Editorial)</h3>
+        </div>
+        <ul>
+          <li>• 8 menu sidebar + form Tambah Paket terpisah</li>
+          <li>• Toggle Siang / Malam bebas kedip di Dashboard</li>
+          <li>• Form Paket: multi-kategori -&gt; dropdown alat + foto + -30% otomatis</li>
+          <li>• Data Trip: upload foto, Paket A/B/C, &amp; multi-mepo + Lainnya</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>Atomik &amp; Validasi Server</h3>
+        </div>
+        <ul>
+          <li>• Zod v4 validation pada seluruh request body</li>
+          <li>• Kunci baris SELECT ... FOR UPDATE urut ID menaik</li>
+          <li>• Paket diekspansi ke detail_sewa agar stok akurat</li>
+          <li>• Upload memeriksa MIME + magic bytes (&lt;= 2 MB)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Fase 1 Aktif vs Fase 2</h3>
+        </div>
+        <ul>
+          <li>• Fase 1 aktif: 13 tabel DB + seluruh Portal Admin</li>
+          <li>• Auth sesi terenkripsi HMAC-SHA256 HttpOnly cookie</li>
+          <li>• Fase 2 ditunda: Halaman Publik, Gallery, &amp; Profil Toko</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">Merayau Outdoor · Portal Admin Architecture · Phase 1 MVP</p>
+  </div>
+</body>
+</html>
+

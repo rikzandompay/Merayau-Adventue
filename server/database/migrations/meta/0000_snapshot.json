@@ -1,0 +1,1370 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "id": "209b99c6-7bd0-429d-af8b-cf50c1477bb9",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "admins": {
+      "name": "admins",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nama": {
+          "name": "nama",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'admin'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_admins_email": {
+          "name": "uq_admins_email",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "admins_id": {
+          "name": "admins_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "detail_sewa": {
+      "name": "detail_sewa",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_sewa": {
+          "name": "id_sewa",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_alat": {
+          "name": "id_alat",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_paket": {
+          "name": "id_paket",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jumlah": {
+          "name": "jumlah",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "harga_satuan": {
+          "name": "harga_satuan",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subtotal_item": {
+          "name": "subtotal_item",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kondisi_kembali": {
+          "name": "kondisi_kembali",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_detail_alat_sewa": {
+          "name": "idx_detail_alat_sewa",
+          "columns": [
+            "id_alat",
+            "id_sewa"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "detail_sewa_id_sewa_transaksi_sewa_id_fk": {
+          "name": "detail_sewa_id_sewa_transaksi_sewa_id_fk",
+          "tableFrom": "detail_sewa",
+          "tableTo": "transaksi_sewa",
+          "columnsFrom": [
+            "id_sewa"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "detail_sewa_id_alat_master_alat_id_fk": {
+          "name": "detail_sewa_id_alat_master_alat_id_fk",
+          "tableFrom": "detail_sewa",
+          "tableTo": "master_alat",
+          "columnsFrom": [
+            "id_alat"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "detail_sewa_id_paket_paket_alat_id_fk": {
+          "name": "detail_sewa_id_paket_paket_alat_id_fk",
+          "tableFrom": "detail_sewa",
+          "tableTo": "paket_alat",
+          "columnsFrom": [
+            "id_paket"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "detail_sewa_id": {
+          "name": "detail_sewa_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "info_trip": {
+      "name": "info_trip",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "kode_trip": {
+          "name": "kode_trip",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "judul": {
+          "name": "judul",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lokasi": {
+          "name": "lokasi",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_berangkat": {
+          "name": "tanggal_berangkat",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "durasi": {
+          "name": "durasi",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kuota": {
+          "name": "kuota",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "foto": {
+          "name": "foto",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "itinerary": {
+          "name": "itinerary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status_publish": {
+          "name": "status_publish",
+          "type": "enum('Published','Draft','Penuh')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Draft'"
+        },
+        "id_admin": {
+          "name": "id_admin",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_info_trip_kode": {
+          "name": "uq_info_trip_kode",
+          "columns": [
+            "kode_trip"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "info_trip_id_admin_admins_id_fk": {
+          "name": "info_trip_id_admin_admins_id_fk",
+          "tableFrom": "info_trip",
+          "tableTo": "admins",
+          "columnsFrom": [
+            "id_admin"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "info_trip_id": {
+          "name": "info_trip_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "kategori_alat": {
+      "name": "kategori_alat",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nama_kategori": {
+          "name": "nama_kategori",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_kategori_nama": {
+          "name": "uq_kategori_nama",
+          "columns": [
+            "nama_kategori"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "kategori_alat_id": {
+          "name": "kategori_alat_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "master_alat": {
+      "name": "master_alat",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "kode_alat": {
+          "name": "kode_alat",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_kategori": {
+          "name": "id_kategori",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama_alat": {
+          "name": "nama_alat",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "spesifikasi": {
+          "name": "spesifikasi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "harga_harian": {
+          "name": "harga_harian",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stok_total": {
+          "name": "stok_total",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kondisi": {
+          "name": "kondisi",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Baik'"
+        },
+        "foto": {
+          "name": "foto",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status_aktif": {
+          "name": "status_aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_master_alat_kode": {
+          "name": "uq_master_alat_kode",
+          "columns": [
+            "kode_alat"
+          ],
+          "isUnique": true
+        },
+        "idx_master_alat_cat_active": {
+          "name": "idx_master_alat_cat_active",
+          "columns": [
+            "id_kategori",
+            "status_aktif"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "master_alat_id_kategori_kategori_alat_id_fk": {
+          "name": "master_alat_id_kategori_kategori_alat_id_fk",
+          "tableFrom": "master_alat",
+          "tableTo": "kategori_alat",
+          "columnsFrom": [
+            "id_kategori"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "master_alat_id": {
+          "name": "master_alat_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "paket_alat": {
+      "name": "paket_alat",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "kode_paket": {
+          "name": "kode_paket",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama_paket": {
+          "name": "nama_paket",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "foto": {
+          "name": "foto",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "diskon_persen": {
+          "name": "diskon_persen",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 30
+        },
+        "tarif_paket": {
+          "name": "tarif_paket",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status_aktif": {
+          "name": "status_aktif",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_paket_alat_kode": {
+          "name": "uq_paket_alat_kode",
+          "columns": [
+            "kode_paket"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "paket_alat_id": {
+          "name": "paket_alat_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "paket_alat_item": {
+      "name": "paket_alat_item",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_paket": {
+          "name": "id_paket",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_alat": {
+          "name": "id_alat",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jumlah": {
+          "name": "jumlah",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_paket_item": {
+          "name": "uq_paket_item",
+          "columns": [
+            "id_paket",
+            "id_alat"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "paket_alat_item_id_paket_paket_alat_id_fk": {
+          "name": "paket_alat_item_id_paket_paket_alat_id_fk",
+          "tableFrom": "paket_alat_item",
+          "tableTo": "paket_alat",
+          "columnsFrom": [
+            "id_paket"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "paket_alat_item_id_alat_master_alat_id_fk": {
+          "name": "paket_alat_item_id_alat_master_alat_id_fk",
+          "tableFrom": "paket_alat_item",
+          "tableTo": "master_alat",
+          "columnsFrom": [
+            "id_alat"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "paket_alat_item_id": {
+          "name": "paket_alat_item_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "pengaturan_sewa": {
+      "name": "pengaturan_sewa",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nama_aturan": {
+          "name": "nama_aturan",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "durasi_dasar_jam": {
+          "name": "durasi_dasar_jam",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 24
+        },
+        "min_hari_promo": {
+          "name": "min_hari_promo",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 3
+        },
+        "diskon_persen": {
+          "name": "diskon_persen",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 15
+        },
+        "toleransi_telat_jam": {
+          "name": "toleransi_telat_jam",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 2
+        },
+        "denda_persen_harian": {
+          "name": "denda_persen_harian",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 50
+        },
+        "is_default": {
+          "name": "is_default",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "pengaturan_sewa_id": {
+          "name": "pengaturan_sewa_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "penyewa": {
+      "name": "penyewa",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "nama": {
+          "name": "nama",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "no_identitas": {
+          "name": "no_identitas",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "no_wa": {
+          "name": "no_wa",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "catatan": {
+          "name": "catatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_penyewa_nik": {
+          "name": "uq_penyewa_nik",
+          "columns": [
+            "no_identitas"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "penyewa_id": {
+          "name": "penyewa_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "peserta_trip": {
+      "name": "peserta_trip",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_trip": {
+          "name": "id_trip",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_trip_paket": {
+          "name": "id_trip_paket",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id_meeting_point": {
+          "name": "id_meeting_point",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "mepo_custom": {
+          "name": "mepo_custom",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "no_identitas": {
+          "name": "no_identitas",
+          "type": "varchar(60)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "no_wa": {
+          "name": "no_wa",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kontak_darurat": {
+          "name": "kontak_darurat",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status_bayar": {
+          "name": "status_bayar",
+          "type": "enum('Lunas','DP 50%','Belum Bayar')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Belum Bayar'"
+        },
+        "nominal_bayar": {
+          "name": "nominal_bayar",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "sewa_alat_tambahan": {
+          "name": "sewa_alat_tambahan",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "idx_peserta_trip_status": {
+          "name": "idx_peserta_trip_status",
+          "columns": [
+            "id_trip",
+            "status_bayar"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "peserta_trip_id_trip_info_trip_id_fk": {
+          "name": "peserta_trip_id_trip_info_trip_id_fk",
+          "tableFrom": "peserta_trip",
+          "tableTo": "info_trip",
+          "columnsFrom": [
+            "id_trip"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "peserta_trip_id_trip_paket_trip_paket_id_fk": {
+          "name": "peserta_trip_id_trip_paket_trip_paket_id_fk",
+          "tableFrom": "peserta_trip",
+          "tableTo": "trip_paket",
+          "columnsFrom": [
+            "id_trip_paket"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "peserta_trip_id_meeting_point_trip_meeting_point_id_fk": {
+          "name": "peserta_trip_id_meeting_point_trip_meeting_point_id_fk",
+          "tableFrom": "peserta_trip",
+          "tableTo": "trip_meeting_point",
+          "columnsFrom": [
+            "id_meeting_point"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "peserta_trip_id": {
+          "name": "peserta_trip_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "transaksi_sewa": {
+      "name": "transaksi_sewa",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "kode_sewa": {
+          "name": "kode_sewa",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_penyewa": {
+          "name": "id_penyewa",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_admin": {
+          "name": "id_admin",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "id_pengaturan": {
+          "name": "id_pengaturan",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jenis_jaminan": {
+          "name": "jenis_jaminan",
+          "type": "enum('KTP','SIM','Kartu Pelajar')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_pinjam": {
+          "name": "tanggal_pinjam",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_kembali_rencana": {
+          "name": "tanggal_kembali_rencana",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_kembali_aktual": {
+          "name": "tanggal_kembali_aktual",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "durasi_hari": {
+          "name": "durasi_hari",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "diskon_nominal": {
+          "name": "diskon_nominal",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "total_biaya_sewa": {
+          "name": "total_biaya_sewa",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "denda_telat": {
+          "name": "denda_telat",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "denda_rusak": {
+          "name": "denda_rusak",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "status_sewa": {
+          "name": "status_sewa",
+          "type": "enum('Disewa','Terlambat','Selesai')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'Disewa'"
+        },
+        "catatan": {
+          "name": "catatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "uq_transaksi_kode": {
+          "name": "uq_transaksi_kode",
+          "columns": [
+            "kode_sewa"
+          ],
+          "isUnique": true
+        },
+        "idx_transaksi_status_due": {
+          "name": "idx_transaksi_status_due",
+          "columns": [
+            "status_sewa",
+            "tanggal_kembali_rencana"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "transaksi_sewa_id_penyewa_penyewa_id_fk": {
+          "name": "transaksi_sewa_id_penyewa_penyewa_id_fk",
+          "tableFrom": "transaksi_sewa",
+          "tableTo": "penyewa",
+          "columnsFrom": [
+            "id_penyewa"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "transaksi_sewa_id_admin_admins_id_fk": {
+          "name": "transaksi_sewa_id_admin_admins_id_fk",
+          "tableFrom": "transaksi_sewa",
+          "tableTo": "admins",
+          "columnsFrom": [
+            "id_admin"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "transaksi_sewa_id_pengaturan_pengaturan_sewa_id_fk": {
+          "name": "transaksi_sewa_id_pengaturan_pengaturan_sewa_id_fk",
+          "tableFrom": "transaksi_sewa",
+          "tableTo": "pengaturan_sewa",
+          "columnsFrom": [
+            "id_pengaturan"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "transaksi_sewa_id": {
+          "name": "transaksi_sewa_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "trip_meeting_point": {
+      "name": "trip_meeting_point",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_trip": {
+          "name": "id_trip",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama_lokasi": {
+          "name": "nama_lokasi",
+          "type": "varchar(180)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_custom": {
+          "name": "is_custom",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "urutan": {
+          "name": "urutan",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "idx_trip_mepo": {
+          "name": "idx_trip_mepo",
+          "columns": [
+            "id_trip",
+            "urutan"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "trip_meeting_point_id_trip_info_trip_id_fk": {
+          "name": "trip_meeting_point_id_trip_info_trip_id_fk",
+          "tableFrom": "trip_meeting_point",
+          "tableTo": "info_trip",
+          "columnsFrom": [
+            "id_trip"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "trip_meeting_point_id": {
+          "name": "trip_meeting_point_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "trip_paket": {
+      "name": "trip_paket",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "id_trip": {
+          "name": "id_trip",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kode_paket": {
+          "name": "kode_paket",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deskripsi_fasilitas": {
+          "name": "deskripsi_fasilitas",
+          "type": "varchar(160)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "harga": {
+          "name": "harga",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uq_trip_paket": {
+          "name": "uq_trip_paket",
+          "columns": [
+            "id_trip",
+            "kode_paket"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "trip_paket_id_trip_info_trip_id_fk": {
+          "name": "trip_paket_id_trip_info_trip_id_fk",
+          "tableFrom": "trip_paket",
+          "tableTo": "info_trip",
+          "columnsFrom": [
+            "id_trip"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "trip_paket_id": {
+          "name": "trip_paket_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    }
+  },
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}

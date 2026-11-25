@@ -1,0 +1,23 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: merayau_mariadb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3307:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: merayau_root
+      MARIADB_DATABASE: merayau_outdoor
+      MARIADB_USER: merayau
+      MARIADB_PASSWORD: merayau_dev
+    volumes:
+      - merayau_mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-u", "merayau", "-pmerayau_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  merayau_mariadb_data:
+

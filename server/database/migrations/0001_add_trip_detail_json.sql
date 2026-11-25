@@ -1,0 +1,1 @@
+ALTER TABLE `info_trip` ADD `detail_json` mediumtext;
