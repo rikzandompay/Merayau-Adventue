@@ -116,11 +116,11 @@ function resetFilters() {
   <div ref="pageRoot" class="mry-public min-h-screen bg-[#FDFCFA] text-[#121613]">
     <PublicNavbar :total-alat="data?.stats?.totalAlatAktif ?? 58" :whatsapp="kontak.whatsapp" />
 
-    <main class="mx-auto max-w-[1280px] overflow-x-clip px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+    <main class="mx-auto max-w-[1280px] overflow-x-clip px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
       <!-- Page Header -->
-      <div data-reveal class="border-b border-[#EAE5DA] pb-8">
+      <div data-reveal class="border-b border-[#EAE5DA] pb-6 sm:pb-8">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
+          <div class="min-w-0">
             <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">
               03 · Katalog Sewa Alat Live Basecamp Pontianak
             </p>
@@ -133,14 +133,14 @@ function resetFilters() {
             </p>
           </div>
           <NuxtLink to="/"
-            class="inline-flex min-h-[42px] items-center rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613] hover:bg-[#F5F2EB]">
+            class="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613] hover:bg-[#F5F2EB]">
             ← Kembali ke Beranda
           </NuxtLink>
         </div>
 
         <!-- Search & Category Pills -->
-        <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div class="relative flex-1 lg:max-w-md">
+        <div class="mt-5 flex flex-col gap-3.5 sm:mt-6 sm:gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div class="relative min-w-0 flex-1 lg:max-w-md">
             <input v-model="searchQuery" type="search"
               placeholder="Cari nama alat, kode (mis. TND-01), atau kapasitas..."
               class="min-h-[46px] w-full rounded-full border border-[#D6D0C4] bg-white pr-4 pl-11 text-sm text-[#121613]"
@@ -154,22 +154,22 @@ function resetFilters() {
 
           <div class="flex flex-wrap items-center gap-2">
             <label
-              class="inline-flex min-h-[42px] cursor-pointer items-center gap-2 rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613]">
+              class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613]">
               <input v-model="onlyAvailable" type="checkbox" class="h-4 w-4 accent-[#1E4D36]" />
               <span>Hanya Stok Tersedia</span>
             </label>
             <label
               v-if="promoAlatCount > 0"
-              class="inline-flex min-h-[42px] cursor-pointer items-center gap-2 rounded-full border border-[#1E4D36]/40 bg-[#E6F0EA]/60 px-4 text-xs font-semibold text-[#1E4D36]">
+              class="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border border-[#1E4D36]/40 bg-[#E6F0EA]/60 px-4 text-xs font-semibold text-[#1E4D36]">
               <input v-model="onlyPromo" type="checkbox" class="h-4 w-4 accent-[#1E4D36]" />
               <span>Sedang Promo ({{ promoAlatCount }})</span>
             </label>
           </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-2">
+        <div class="mry-no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button type="button"
-            class="mry-mono min-h-[40px] cursor-pointer rounded-full border px-4 text-xs font-semibold transition-colors"
+            class="mry-mono min-h-[44px] shrink-0 cursor-pointer whitespace-nowrap rounded-full border px-4 text-xs font-semibold transition-colors"
             :class="selectedCategory === 'Semua'
               ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
               : 'border-[#D6D0C4] bg-white text-[#2E3530] hover:bg-[#F5F2EB]'
@@ -177,7 +177,7 @@ function resetFilters() {
             Semua ({{ data?.alat?.length ?? 0 }})
           </button>
           <button v-for="cat in categories" :key="cat.id" type="button"
-            class="mry-mono min-h-[40px] cursor-pointer rounded-full border px-4 text-xs font-semibold transition-colors"
+            class="mry-mono min-h-[44px] shrink-0 cursor-pointer whitespace-nowrap rounded-full border px-4 text-xs font-semibold transition-colors"
             :class="selectedCategory === cat.namaKategori
               ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
               : 'border-[#D6D0C4] bg-white text-[#2E3530] hover:bg-[#F5F2EB]'
@@ -191,15 +191,15 @@ function resetFilters() {
       <div v-if="error && !data" class="my-8 rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
         <div class="font-semibold text-red-800">Gagal memuat katalog alat</div>
         <button type="button"
-          class="mt-3 min-h-[42px] cursor-pointer rounded-full bg-[#1E4D36] px-5 text-xs font-semibold text-white"
+          class="mt-3 min-h-[44px] cursor-pointer rounded-full bg-[#1E4D36] px-5 text-xs font-semibold text-white"
           @click="refresh()">
           Coba Lagi
         </button>
       </div>
 
-      <div class="mt-8 grid items-start gap-8 lg:grid-cols-12">
+      <div class="mt-6 grid items-start gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-12">
         <!-- Left Catalog Items + Bundel Strip -->
-        <div class="space-y-8 lg:col-span-8">
+        <div class="min-w-0 space-y-6 sm:space-y-8 lg:col-span-8">
           <!-- Paket & Item Bundle Quick Strip -->
           <div v-if="packages.length" class="space-y-3">
             <div
@@ -207,10 +207,10 @@ function resetFilters() {
               :key="`strip-${pkg.id}`"
               data-reveal-scale
               style="--reveal-delay: 80ms"
-              class="rounded-2xl border border-[#1E4D36]/25 bg-[#121613] p-5 text-white"
+              class="rounded-2xl border border-[#1E4D36]/25 bg-[#121613] p-4 text-white sm:p-5"
             >
               <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                <div>
+                <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="mry-mono text-[11px] font-semibold text-[#93B47E] uppercase">
                       {{ pkg.tipePaket === 'bundle' ? 'Item Bundle Promo' : 'Paket Bundel Siap Berangkat' }}
@@ -233,8 +233,8 @@ function resetFilters() {
                     {{ pkg.items.map((it) => `${it.jumlah}x ${it.namaAlat}`).join(' · ') }}
                   </div>
                 </div>
-                <div class="flex shrink-0 items-center gap-3">
-                  <div class="text-right">
+                <div class="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
+                  <div class="text-left sm:text-right">
                     <div
                       v-if="pkg.hargaEfektif < (pkg.tipePaket === 'bundle' ? pkg.totalNormal : pkg.tarifPaket)"
                       class="mry-mono text-xs text-[#D6D0C4] line-through"
@@ -246,7 +246,7 @@ function resetFilters() {
                     </div>
                   </div>
                   <button type="button"
-                    class="min-h-[42px] cursor-pointer rounded-full bg-[#93B47E] px-4 text-xs font-bold text-[#121613] hover:bg-[#A6C493]"
+                    class="min-h-[44px] shrink-0 cursor-pointer rounded-full bg-[#93B47E] px-4 text-xs font-bold text-[#121613] hover:bg-[#A6C493]"
                     :disabled="pkg.kuotaTersedia <= 0"
                     @click="cart.addPaket(pkg, false)">
                     {{ pkg.tipePaket === 'bundle' ? '+ Bundle' : '+ Paket' }}
@@ -329,7 +329,7 @@ function resetFilters() {
 
                 <div v-if="cart.getAlatQty(item.id) > 0" class="flex items-center gap-1.5">
                   <button type="button"
-                    class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
                     aria-label="Kurangi jumlah" @click="cart.setAlatQty(item.id, cart.getAlatQty(item.id) - 1)">
                     -
                   </button>
@@ -337,7 +337,7 @@ function resetFilters() {
                     {{ cart.getAlatQty(item.id) }}
                   </span>
                   <button type="button"
-                    class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-[#1E4D36] bg-[#1E4D36] text-sm font-bold text-white"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#1E4D36] bg-[#1E4D36] text-sm font-bold text-white"
                     aria-label="Tambah jumlah" :disabled="cart.getAlatQty(item.id) >= item.stokTersedia"
                     @click="cart.addAlat(item, false)">
                     +
@@ -345,7 +345,7 @@ function resetFilters() {
                 </div>
 
                 <button v-else type="button" :disabled="item.stokTersedia <= 0"
-                  class="min-h-[38px] cursor-pointer rounded-full bg-[#121613] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#1E4D36] disabled:cursor-not-allowed disabled:opacity-45"
+                  class="min-h-[44px] cursor-pointer rounded-full bg-[#121613] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#1E4D36] disabled:cursor-not-allowed disabled:opacity-45"
                   @click="cart.addAlat(item, false)">
                   {{ item.stokTersedia > 0 ? '+ Sewa' : 'Habis' }}
                 </button>
@@ -355,7 +355,7 @@ function resetFilters() {
         </div>
 
         <!-- Right Sticky Daftar Sewa Kamu Estimator (Desktop) -->
-        <aside class="lg:sticky lg:top-24 lg:col-span-4">
+        <aside class="min-w-0 lg:sticky lg:top-24 lg:col-span-4">
           <div class="rounded-2xl border border-[#D6D0C4] bg-white p-5 shadow-xs">
             <div class="flex items-center justify-between border-b border-[#EAE5DA] pb-3.5">
               <div>
@@ -479,5 +479,17 @@ function resetFilters() {
       :maps-url="kontak.mapsUrl" />
 
     <PublicRentalCartDrawer :aturan="aturan" :whatsapp="kontak.whatsapp" :promos="data?.promos" />
+
+    <button
+      v-if="cart.totalCount.value > 0"
+      type="button"
+      class="fixed right-4 bottom-4 z-40 inline-flex min-h-[48px] max-w-[calc(100vw-2rem)] cursor-pointer items-center gap-2.5 rounded-full bg-[#1E4D36] px-5 text-sm font-semibold text-white shadow-xl transition-transform hover:scale-[1.02] hover:bg-[#163B29] lg:hidden"
+      @click="cart.drawerOpen.value = true"
+    >
+      <span>Daftar Sewa ({{ cart.totalCount.value }})</span>
+      <span class="mry-mono rounded-full bg-white/20 px-2.5 py-0.5 text-xs">
+        {{ formatRupiah(estimate.grandTotal) }}
+      </span>
+    </button>
   </div>
 </template>

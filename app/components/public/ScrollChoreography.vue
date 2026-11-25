@@ -21,6 +21,7 @@ const props = defineProps<{
 
 const containerRef = ref<HTMLElement | null>(null)
 const smoothProgress = ref(0)
+const isMobile = ref(false)
 
 let targetProgress = 0
 let velocity = 0
@@ -90,6 +91,9 @@ function tickSpring(now: number) {
 }
 
 function updateScrollTarget() {
+  if (import.meta.client) {
+    isMobile.value = window.innerWidth < 768
+  }
   const el = containerRef.value
   if (!el) return
 
@@ -127,17 +131,19 @@ onBeforeUnmount(() => {
   }
 })
 
-// Default positions relative to center
-const X_LEFT = -20
-const X_RIGHT = 20
-const Y_TOP = -14
-const Y_BOTTOM = 14
 const PHASE_STOPS = [0, 0.3, 0.35, 0.65, 1]
+
+const layoutDims = computed(() =>
+  isMobile.value
+    ? { xLeft: -23, xRight: 23, yTop: -4, yBottom: 19, baseW: 42, baseH: 20 }
+    : { xLeft: -20, xRight: 20, yTop: -14, yBottom: 14, baseW: 36, baseH: 24 },
+)
 
 const tlStyle = computed(() => {
   const p = smoothProgress.value
-  const x = interpolate(p, PHASE_STOPS, [X_LEFT, X_LEFT, X_LEFT, 0, 0])
-  const y = interpolate(p, PHASE_STOPS, [Y_TOP, Y_BOTTOM, Y_BOTTOM, 0, 0])
+  const d = layoutDims.value
+  const x = interpolate(p, PHASE_STOPS, [d.xLeft, d.xLeft, d.xLeft, 0, 0])
+  const y = interpolate(p, PHASE_STOPS, [d.yTop, d.yBottom, d.yBottom, 0, 0])
   const opacity = interpolate(p, [0.75, 0.85], [1, 0])
   return {
     transform: `translate3d(calc(-50% + ${x.toFixed(3)}vw), calc(-50% + ${y.toFixed(3)}vh), 0)`,
@@ -147,8 +153,9 @@ const tlStyle = computed(() => {
 
 const brStyle = computed(() => {
   const p = smoothProgress.value
-  const x = interpolate(p, PHASE_STOPS, [X_RIGHT, X_RIGHT, X_RIGHT, 0, 0])
-  const y = interpolate(p, PHASE_STOPS, [Y_BOTTOM, Y_TOP, Y_TOP, 0, 0])
+  const d = layoutDims.value
+  const x = interpolate(p, PHASE_STOPS, [d.xRight, d.xRight, d.xRight, 0, 0])
+  const y = interpolate(p, PHASE_STOPS, [d.yBottom, d.yTop, d.yTop, 0, 0])
   const opacity = interpolate(p, [0.75, 0.85], [1, 0])
   return {
     transform: `translate3d(calc(-50% + ${x.toFixed(3)}vw), calc(-50% + ${y.toFixed(3)}vh), 0)`,
@@ -158,8 +165,9 @@ const brStyle = computed(() => {
 
 const blStyle = computed(() => {
   const p = smoothProgress.value
-  const x = interpolate(p, PHASE_STOPS, [X_LEFT, X_LEFT, X_LEFT, 0, 0])
-  const y = interpolate(p, PHASE_STOPS, [Y_BOTTOM, Y_BOTTOM, Y_BOTTOM, 0, 0])
+  const d = layoutDims.value
+  const x = interpolate(p, PHASE_STOPS, [d.xLeft, d.xLeft, d.xLeft, 0, 0])
+  const y = interpolate(p, PHASE_STOPS, [d.yBottom, d.yBottom, d.yBottom, 0, 0])
   const opacity = interpolate(p, [0.75, 0.85], [1, 0])
   return {
     transform: `translate3d(calc(-50% + ${x.toFixed(3)}vw), calc(-50% + ${y.toFixed(3)}vh), 0)`,
@@ -169,10 +177,11 @@ const blStyle = computed(() => {
 
 const trStyle = computed(() => {
   const p = smoothProgress.value
-  const x = interpolate(p, PHASE_STOPS, [X_RIGHT, X_RIGHT, X_RIGHT, 0, 0])
-  const y = interpolate(p, PHASE_STOPS, [Y_TOP, Y_TOP, Y_TOP, 0, 0])
-  const width = interpolate(p, [0.65, 0.7, 0.9, 1], [36, 36, 100, 100])
-  const height = interpolate(p, [0.65, 0.7, 0.9, 1], [24, 24, 100, 100])
+  const d = layoutDims.value
+  const x = interpolate(p, PHASE_STOPS, [d.xRight, d.xRight, d.xRight, 0, 0])
+  const y = interpolate(p, PHASE_STOPS, [d.yTop, d.yTop, d.yTop, 0, 0])
+  const width = interpolate(p, [0.65, 0.7, 0.9, 1], [d.baseW, d.baseW, 100, 100])
+  const height = interpolate(p, [0.65, 0.7, 0.9, 1], [d.baseH, d.baseH, 100, 100])
   const radius = interpolate(p, [0.7, 0.9], [16, 0])
   return {
     transform: `translate3d(calc(-50% + ${x.toFixed(3)}vw), calc(-50% + ${y.toFixed(3)}vh), 0)`,
@@ -184,14 +193,14 @@ const trStyle = computed(() => {
 
 const cornerLabelOpacity = computed(() => interpolate(smoothProgress.value, [0.65, 0.78], [1, 0]))
 const BASE_FRAME_CLASSES =
-  'absolute left-1/2 top-1/2 h-[24vh] w-[36vw] overflow-hidden rounded-2xl bg-[#EAE5DA] shadow-2xl will-change-transform'
+  'absolute left-1/2 top-1/2 h-[20dvh] w-[42vw] md:h-[24vh] md:w-[36vw] overflow-hidden rounded-2xl bg-[#EAE5DA] shadow-2xl will-change-transform'
 </script>
 
 <template>
-  <div ref="containerRef" :class="['relative h-[300vh] w-full', className]">
-    <div class="sticky top-0 z-10 h-screen w-full overflow-hidden bg-white">
+  <div ref="containerRef" :class="['relative h-[220vh] w-full md:h-[300vh]', className]">
+    <div class="sticky top-0 z-10 h-[100dvh] w-full overflow-hidden bg-white">
       <!-- Top editorial HUD above frames while cards choreograph -->
-      <div class="pointer-events-none relative z-50 mx-auto max-w-[1280px] px-4 pt-20 sm:px-6 lg:px-8">
+      <div class="pointer-events-none relative z-50 mx-auto max-w-[1280px] px-4 pt-16 sm:px-6 sm:pt-20 lg:px-8">
         <slot name="top-hud" :progress="smoothProgress" />
       </div>
 

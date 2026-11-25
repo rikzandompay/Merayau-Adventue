@@ -719,7 +719,7 @@ function submitContactForm() {
 
     <main>
       <!-- 01 · BRIGHT ALPINE HERO -->
-      <section class="relative overflow-hidden bg-white pt-10 pb-0 sm:pt-14 lg:min-h-[540px]">
+      <section class="relative overflow-hidden bg-white pt-7 pb-0 sm:pt-14 lg:min-h-[540px]">
         <!-- Subtle pale topographic contour background with gentle scroll depth -->
         <svg
           data-parallax-top="0.32"
@@ -736,8 +736,8 @@ function submitContactForm() {
           <path d="M120 620 C 370 550, 560 470, 820 510 C 1080 550, 1260 390, 1520 430" stroke="#E5E0D5" stroke-width="1" />
         </svg>
 
-        <div class="mx-auto grid max-w-[1280px] items-center gap-8 px-4 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8">
-          <div class="relative z-10 pb-6 lg:col-span-6 lg:pb-16">
+        <div class="mx-auto grid max-w-[1280px] items-center gap-6 px-4 sm:gap-8 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8">
+          <div class="relative z-10 min-w-0 pb-4 sm:pb-6 lg:col-span-6 lg:pb-16">
             <p
               data-reveal
               style="--reveal-delay: 0ms"
@@ -748,14 +748,14 @@ function submitContactForm() {
             <h1
               data-reveal
               style="--reveal-delay: 90ms"
-              class="mry-serif mt-4 text-4xl leading-[1.08] font-semibold text-[#121613] sm:text-5xl lg:text-[54px]"
+              class="mry-serif mt-3 text-[32px] leading-[1.1] font-semibold text-[#121613] sm:mt-4 sm:text-5xl lg:text-[54px]"
             >
               Perlengkapan gunung &amp; open trip dari Pontianak
             </h1>
             <p
               data-reveal
               style="--reveal-delay: 180ms"
-              class="mt-5 max-w-lg text-base leading-relaxed text-[#2E3530] sm:text-lg"
+              class="mt-4 max-w-lg text-sm leading-relaxed text-[#2E3530] sm:mt-5 sm:text-lg"
             >
               Stok alat pendakian siap pakai per {{ aturan.durasiMinimalJam }} jam di Basecamp Tanjung Raya 2, paket bundel siap berangkat, serta open trip terjadwal dengan kuota live dari sistem admin.
             </p>
@@ -763,24 +763,24 @@ function submitContactForm() {
             <div
               data-reveal
               style="--reveal-delay: 270ms"
-              class="mt-8 flex flex-wrap items-center gap-3.5"
+              class="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3.5"
             >
               <NuxtLink
                 to="/katalog"
-                class="inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#1E4D36] px-6 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#163B29]"
+                class="inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#1E4D36] px-6 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#163B29] sm:w-auto"
               >
                 Lihat {{ stats.totalAlatAktif }} Alat Sewa
               </NuxtLink>
               <a
                 href="#open-trip"
-                class="inline-flex min-h-[48px] items-center justify-center rounded-full border border-[#121613]/25 bg-white px-6 text-sm font-semibold text-[#121613] transition-colors hover:border-[#121613] hover:bg-[#F5F2EB]"
+                class="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-[#121613]/25 bg-white px-6 text-sm font-semibold text-[#121613] transition-colors hover:border-[#121613] hover:bg-[#F5F2EB] sm:w-auto"
               >
                 Jadwal Open Trip
               </a>
             </div>
           </div>
 
-          <div class="-mx-4 flex justify-center sm:-mx-6 lg:static lg:col-span-6 lg:mx-0">
+          <div class="-mx-4 flex min-w-0 justify-center sm:-mx-6 lg:static lg:col-span-6 lg:mx-0">
             <div
               data-reveal-media
               style="--reveal-delay: 150ms"
@@ -800,10 +800,10 @@ function submitContactForm() {
       <!-- 01b · PROFIL MERAYAU ADVENTURE PONTIANAK (Hero04 Collage + Sage Editorial Band) -->
       <section
         id="profil-merayau"
-        class="overflow-x-clip border-y border-[#7E9F6A] bg-[#93B47E] py-16 text-[#121613] sm:py-20"
+        class="overflow-x-clip border-y border-[#7E9F6A] bg-[#93B47E] py-12 text-[#121613] sm:py-20"
       >
-        <div class="mx-auto grid max-w-[1280px] items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div class="space-y-5 lg:col-span-6">
+        <div class="mx-auto grid max-w-[1280px] items-center gap-8 px-4 sm:gap-12 sm:px-6 lg:grid-cols-12 lg:px-8">
+          <div class="min-w-0 space-y-5 lg:col-span-6">
             <span
               data-reveal
               style="--reveal-delay: 0ms"
@@ -870,7 +870,7 @@ function submitContactForm() {
             </div>
           </div>
 
-          <div class="group relative mx-auto w-full max-w-lg lg:col-span-6">
+          <div class="group relative mx-auto w-full min-w-0 max-w-lg lg:col-span-6">
             <div data-parallax-float="-0.08" class="mry-parallax-layer">
               <div
                 data-reveal-clip
@@ -911,28 +911,28 @@ function submitContactForm() {
       </section>
 
       <!-- 01c · KETERANGAN RINGKAS 4 KOLOM -->
-      <section class="overflow-x-clip border-b border-[#EAE5DA] bg-white py-14">
+      <section class="overflow-x-clip border-b border-[#EAE5DA] bg-white py-10 sm:py-14">
         <div ref="metricsRef" class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-          <div data-reveal-stagger class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div style="--stagger-delay: 0ms" class="mry-stagger-item space-y-1.5 border-l-2 border-[#EAE5DA] pl-5">
+          <div data-reveal-stagger class="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-8 lg:grid-cols-4">
+            <div style="--stagger-delay: 0ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
                 Berdiri Sejak
               </div>
-              <div class="mry-serif text-3xl font-semibold text-[#121613]">{{ metricYear }}</div>
-              <div class="text-base font-semibold text-[#2E3530]">Basecamp</div>
+              <div class="mry-serif text-2xl font-semibold text-[#121613] sm:text-3xl">{{ metricYear }}</div>
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Basecamp</div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
                 Melayani sewa alat camping &amp; perlengkapan mendaki gunung di Kota Pontianak.
               </p>
             </div>
 
-            <div style="--stagger-delay: 90ms" class="mry-stagger-item space-y-1.5 border-l-2 border-[#EAE5DA] pl-5">
+            <div style="--stagger-delay: 90ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
                 Katalog Live
               </div>
-              <div class="mry-serif mry-mono text-3xl font-semibold text-[#121613]">
+              <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">
                 {{ metricStok }}+
               </div>
-              <div class="text-base font-semibold text-[#2E3530]">
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">
                 Unit ({{ stats.totalAlatAktif }} Jenis)
               </div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
@@ -940,25 +940,25 @@ function submitContactForm() {
               </p>
             </div>
 
-            <div style="--stagger-delay: 180ms" class="mry-stagger-item space-y-1.5 border-l-2 border-[#EAE5DA] pl-5">
+            <div style="--stagger-delay: 180ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
                 Promo Multi-Hari
               </div>
-              <div class="mry-serif mry-mono text-3xl font-semibold text-[#121613]">
+              <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">
                 {{ metricPromo }}%
               </div>
-              <div class="text-base font-semibold text-[#2E3530]">Otomatis</div>
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Otomatis</div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
                 Diskon langsung di sistem untuk penyewaan durasi minimal {{ aturan.minHariPromo }} hari.
               </p>
             </div>
 
-            <div style="--stagger-delay: 270ms" class="mry-stagger-item space-y-1.5 border-l-2 border-[#EAE5DA] pl-5">
+            <div style="--stagger-delay: 270ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
                 Paket Tektok
               </div>
-              <div class="mry-serif mry-mono text-3xl font-semibold text-[#121613]">{{ metricBundel }}%</div>
-              <div class="text-base font-semibold text-[#2E3530]">Lebih Hemat</div>
+              <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">{{ metricBundel }}%</div>
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Lebih Hemat</div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
                 Bundel perlengkapan siap jalan mulai {{ formatRupiah(stats.hargaPaketMulai) }} / 24 jam.
               </p>
@@ -1005,14 +1005,14 @@ function submitContactForm() {
                 opacity: Math.max(0, Math.min(1, (progress - 0.80) / 0.10)),
                 pointerEvents: progress >= 0.82 ? 'auto' : 'none',
               }"
-              class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/30 to-transparent px-6 pt-6 pb-10 text-white sm:p-10 lg:p-14"
+              class="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/30 to-transparent px-4 pt-6 pb-8 text-white sm:p-10 lg:p-14"
             >
-              <div class="mx-auto flex w-full max-w-[1280px] flex-col justify-between gap-6 sm:flex-row sm:items-end">
-                <div class="max-w-2xl">
+              <div class="mx-auto flex w-full max-w-[1280px] flex-col justify-between gap-5 sm:flex-row sm:items-end sm:gap-6">
+                <div class="min-w-0 max-w-2xl">
                   <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#93B47E] uppercase">
                     Destinasi Unggulan · {{ trips[0]?.detail?.elevation || '3.145 MDPL' }} · {{ trips[0]?.lokasi || 'Jawa Tengah' }}
                   </p>
-                  <h3 class="mry-serif mt-2 text-3xl leading-tight font-semibold text-white sm:text-5xl">
+                  <h3 class="mry-serif mt-2 text-2xl leading-tight font-semibold text-white sm:text-5xl">
                     {{ trips[0]?.judul || 'Merbabu via Selo (2D1N)' }}
                   </h3>
                   <p class="mt-2.5 text-sm leading-relaxed text-white/85 sm:text-base">
@@ -1041,9 +1041,9 @@ function submitContactForm() {
         </PublicScrollChoreography>
 
         <!-- Right-aligned/Full Live Open Trip schedule ledger right below the choreography -->
-        <div id="open-trip-ledger" class="border-t border-[#EAE5DA] bg-white py-14 sm:py-16">
-          <div class="mx-auto grid max-w-[1280px] items-start gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-            <div class="lg:col-span-5">
+        <div id="open-trip-ledger" class="border-t border-[#EAE5DA] bg-white py-12 sm:py-16">
+          <div class="mx-auto grid max-w-[1280px] items-start gap-8 px-4 sm:gap-10 sm:px-6 lg:grid-cols-12 lg:px-8">
+            <div class="min-w-0 lg:col-span-5">
               <p data-reveal style="--reveal-delay: 0ms" class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">
                 Jadwal Terbuka · Live Database
               </p>
@@ -1074,7 +1074,7 @@ function submitContactForm() {
               </div>
             </div>
 
-            <div class="lg:col-span-7">
+            <div class="min-w-0 lg:col-span-7">
               <div v-if="pending && !trips.length" class="space-y-3">
                 <div v-for="n in 3" :key="n" class="h-16 animate-pulse rounded-xl bg-[#F5F2EB]" />
               </div>
@@ -1124,7 +1124,7 @@ function submitContactForm() {
       </section>
 
       <!-- 02b · PILIHAN OPEN TRIP CAROUSEL (Gallery4 Style) -->
-      <section v-if="trips.length" class="overflow-x-clip border-y border-[#EAE5DA] bg-[#F5F2EB] py-16 sm:py-20">
+      <section v-if="trips.length" class="overflow-x-clip border-y border-[#EAE5DA] bg-[#F5F2EB] py-12 sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
           <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end" data-reveal>
             <div>
@@ -1229,10 +1229,10 @@ function submitContactForm() {
       </section>
 
       <!-- 03 · PAKET TEKTOK OBSIDIAN BAND -->
-      <section id="paket-tektok" class="overflow-x-clip bg-[#121613] py-16 text-white sm:py-20">
+      <section id="paket-tektok" class="overflow-x-clip bg-[#121613] py-12 text-white sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-          <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <div data-reveal style="--reveal-delay: 0ms">
+          <div class="mb-6 flex flex-wrap items-center justify-between gap-4 sm:mb-8">
+            <div data-reveal style="--reveal-delay: 0ms" class="min-w-0">
               <p class="mry-mono text-xs font-medium tracking-[0.14em] text-[#93B47E] uppercase">
                 03 · Paket Bundel Alat
               </p>
@@ -1246,7 +1246,7 @@ function submitContactForm() {
                 v-for="(pkg, idx) in packages"
                 :key="pkg.id"
                 type="button"
-                class="inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 rounded-full border px-4 text-xs font-semibold transition-colors"
+                class="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-full border px-4 text-xs font-semibold transition-colors"
                 :class="
                   activePackageIdx === idx
                     ? 'border-[#93B47E] bg-[#93B47E] text-[#121613]'
@@ -1268,9 +1268,9 @@ function submitContactForm() {
 
           <div
             v-if="currentPackage"
-            class="grid items-center gap-10 rounded-3xl border border-white/15 bg-[#191E1A] p-6 sm:p-8 lg:grid-cols-12 lg:p-10"
+            class="grid items-center gap-6 rounded-3xl border border-white/15 bg-[#191E1A] p-4 sm:gap-10 sm:p-8 lg:grid-cols-12 lg:p-10"
           >
-            <div data-reveal-left style="--reveal-delay: 60ms" class="lg:col-span-5">
+            <div data-reveal-left style="--reveal-delay: 60ms" class="min-w-0 lg:col-span-5">
               <div data-parallax-float="-0.09" class="mry-parallax-layer overflow-hidden rounded-2xl border border-white/10 bg-[#121613]">
                 <img
                   :src="currentPackage.fotoUrl"
@@ -1280,7 +1280,7 @@ function submitContactForm() {
               </div>
             </div>
 
-            <div class="space-y-6 lg:col-span-7">
+            <div class="min-w-0 space-y-6 lg:col-span-7">
               <div data-reveal-right style="--reveal-delay: 110ms">
                 <div class="mb-2.5 flex flex-wrap items-center gap-2">
                   <span
@@ -1348,10 +1348,10 @@ function submitContactForm() {
                   </div>
                 </div>
 
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <button
                     type="button"
-                    class="min-h-[46px] cursor-pointer rounded-full bg-[#93B47E] px-6 text-sm font-bold text-[#121613] transition-colors hover:bg-[#A6C493]"
+                    class="min-h-[46px] w-full cursor-pointer rounded-full bg-[#93B47E] px-6 text-sm font-bold text-[#121613] transition-colors hover:bg-[#A6C493] sm:w-auto"
                     :disabled="currentPackage.kuotaTersedia <= 0"
                     @click="cart.addPaket(currentPackage, true)"
                   >
@@ -1361,7 +1361,7 @@ function submitContactForm() {
                     :href="packageWaUrl(currentPackage)"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex min-h-[46px] items-center gap-2 rounded-full border border-white/25 px-5 text-sm font-semibold text-white hover:bg-white/10"
+                    class="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-full border border-white/25 px-5 text-sm font-semibold text-white hover:bg-white/10 sm:w-auto"
                   >
                     <WaIcon :size="16" />
                     <span>Booking via WA</span>
@@ -1378,7 +1378,7 @@ function submitContactForm() {
       </section>
 
       <!-- 04 · KATALOG ALAT BASECAMP - INFINITE HORIZONTAL MARQUEE -->
-      <section id="katalog-marquee" class="overflow-x-clip border-b border-[#EAE5DA] bg-[#FDFCFA] py-16 sm:py-20">
+      <section id="katalog-marquee" class="overflow-x-clip border-b border-[#EAE5DA] bg-[#FDFCFA] py-12 sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
           <div data-reveal style="--reveal-delay: 0ms" class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
@@ -1485,7 +1485,7 @@ function submitContactForm() {
       </section>
 
       <!-- 04b · ALUR & ATURAN SEWA (Light Theme) -->
-      <section id="aturan-sewa" class="overflow-x-clip bg-white py-16 sm:py-20">
+      <section id="aturan-sewa" class="overflow-x-clip bg-white py-12 sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
           <div data-reveal style="--reveal-delay: 0ms" class="max-w-2xl">
             <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">
@@ -1500,7 +1500,7 @@ function submitContactForm() {
           </div>
 
           <!-- Two 5-step vertical timelines -->
-          <div class="mt-10 grid gap-10 lg:grid-cols-2 lg:gap-12">
+          <div class="mt-8 grid gap-6 sm:mt-10 sm:gap-10 lg:grid-cols-2 lg:gap-12">
             <div
               v-for="(flow, flowIdx) in [
                 { label: '01 · Alur Booking Online (Sistem Web)', steps: onlineSteps },
@@ -1510,7 +1510,7 @@ function submitContactForm() {
               :data-reveal-left="flowIdx === 0 ? '' : undefined"
               :data-reveal-right="flowIdx === 1 ? '' : undefined"
               :style="`--reveal-delay: ${flowIdx * 120}ms`"
-              class="rounded-2xl border border-[#EAE5DA] bg-[#FDFCFA] p-6 sm:p-7"
+              class="min-w-0 rounded-2xl border border-[#EAE5DA] bg-[#FDFCFA] p-4 sm:p-7"
             >
               <div class="mry-mono border-b border-[#EAE5DA] pb-3 text-xs font-semibold tracking-[0.1em] text-[#1E4D36] uppercase">
                 {{ flow.label }}
@@ -1611,7 +1611,7 @@ function submitContactForm() {
                 </div>
                 <button
                   type="button"
-                  class="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#5C645E] transition-colors hover:bg-black/5 hover:text-[#121613]"
+                  class="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#5C645E] transition-colors hover:bg-black/5 hover:text-[#121613]"
                   :aria-label="`Tutup ${rule.title}`"
                   @click="dismissRule(rule.id)"
                 >
@@ -1631,9 +1631,9 @@ function submitContactForm() {
       </section>
 
       <!-- 05 · KONTAK BASECAMP -->
-      <section id="kontak" class="overflow-x-clip border-t border-[#EAE5DA] bg-[#F5F2EB] py-16 sm:py-20">
-        <div class="mx-auto grid max-w-[1280px] gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div data-reveal-left style="--reveal-delay: 0ms" class="space-y-5 lg:col-span-5">
+      <section id="kontak" class="overflow-x-clip border-t border-[#EAE5DA] bg-[#F5F2EB] py-12 sm:py-20">
+        <div class="mx-auto grid max-w-[1280px] gap-8 px-4 sm:gap-10 sm:px-6 lg:grid-cols-12 lg:px-8">
+          <div data-reveal-left style="--reveal-delay: 0ms" class="min-w-0 space-y-5 lg:col-span-5">
             <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">
               05 · Kontak Basecamp
             </p>
@@ -1655,9 +1655,9 @@ function submitContactForm() {
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E6F0EA] text-[#1E4D36]">
                   <WaIcon :size="20" />
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="mry-mono text-[11px] font-semibold tracking-wider text-[#5C645E] uppercase">WhatsApp</div>
-                  <div class="mry-mono text-sm font-bold text-[#121613]">{{ kontak.whatsappDisplay }}</div>
+                  <div class="mry-mono truncate text-sm font-bold text-[#121613]">{{ kontak.whatsappDisplay }}</div>
                 </div>
               </a>
 
@@ -1672,9 +1672,9 @@ function submitContactForm() {
                     <path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="mry-mono text-[11px] font-semibold tracking-wider text-[#5C645E] uppercase">Email Resmi</div>
-                  <div class="text-sm font-bold text-[#121613]">{{ kontak.email }}</div>
+                  <div class="truncate text-sm font-bold text-[#121613]">{{ kontak.email }}</div>
                 </div>
               </a>
 
@@ -1691,7 +1691,7 @@ function submitContactForm() {
                     <circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8" />
                   </svg>
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="mry-mono text-[11px] font-semibold tracking-wider text-[#5C645E] uppercase">Basecamp</div>
                   <div class="text-sm font-bold text-[#121613]">
                     Merayau Adventure Pontianak · {{ kontak.alamatSingkat }}
@@ -1701,9 +1701,9 @@ function submitContactForm() {
             </div>
           </div>
 
-          <div data-reveal-right style="--reveal-delay: 150ms" class="lg:col-span-7">
+          <div data-reveal-right style="--reveal-delay: 150ms" class="min-w-0 lg:col-span-7">
             <form
-              class="rounded-3xl border border-[#D6D0C4] bg-white p-6 shadow-xs sm:p-8"
+              class="rounded-3xl border border-[#D6D0C4] bg-white p-4 shadow-xs sm:p-8"
               novalidate
               @submit.prevent="submitContactForm"
             >
@@ -1831,7 +1831,7 @@ function submitContactForm() {
     <div
       v-if="cart.toastMessage.value"
       role="status"
-      class="fixed bottom-20 left-1/2 z-40 -translate-x-1/2 rounded-full border border-[#1E4D36]/30 bg-[#121613] px-5 py-2.5 text-xs font-semibold text-white shadow-lg"
+      class="fixed bottom-20 left-1/2 z-40 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-full border border-[#1E4D36]/30 bg-[#121613] px-5 py-2.5 text-center text-xs font-semibold text-white shadow-lg"
     >
       {{ cart.toastMessage.value }}
     </div>
@@ -1839,7 +1839,7 @@ function submitContactForm() {
     <button
       v-if="cart.totalCount.value > 0"
       type="button"
-      class="fixed right-5 bottom-5 z-40 inline-flex min-h-[48px] cursor-pointer items-center gap-2.5 rounded-full bg-[#1E4D36] px-5 text-sm font-semibold text-white shadow-xl transition-transform hover:scale-[1.02] hover:bg-[#163B29]"
+      class="fixed right-4 bottom-4 z-40 inline-flex min-h-[48px] max-w-[calc(100vw-2rem)] cursor-pointer items-center gap-2.5 rounded-full bg-[#1E4D36] px-5 text-sm font-semibold text-white shadow-xl transition-transform hover:scale-[1.02] hover:bg-[#163B29]"
       @click="cart.drawerOpen.value = true"
     >
       <span>Daftar Sewa ({{ cart.totalCount.value }})</span>

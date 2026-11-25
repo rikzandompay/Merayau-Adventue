@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
                 <div class="flex shrink-0 items-center gap-1.5">
                   <button
                     type="button"
-                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-white text-sm font-bold text-[#121613]"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-white text-sm font-bold text-[#121613]"
                     aria-label="Kurangi jumlah paket"
                     @click="cart.setPaketQty(pkg.id, pkg.qty - 1)"
                   >
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
                   <span class="mry-mono w-6 text-center text-xs font-semibold text-[#121613]">{{ pkg.qty }}</span>
                   <button
                     type="button"
-                    class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-white text-sm font-bold text-[#121613]"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-white text-sm font-bold text-[#121613]"
                     aria-label="Tambah jumlah paket"
                     @click="cart.setPaketQty(pkg.id, pkg.qty + 1)"
                   >
@@ -181,7 +181,7 @@ onBeforeUnmount(() => {
               <div class="flex shrink-0 items-center gap-1.5">
                 <button
                   type="button"
-                  class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
+                  class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
                   aria-label="Kurangi unit"
                   @click="cart.setAlatQty(item.id, item.qty - 1)"
                 >
@@ -190,7 +190,7 @@ onBeforeUnmount(() => {
                 <span class="mry-mono w-6 text-center text-xs font-semibold text-[#121613]">{{ item.qty }}</span>
                 <button
                   type="button"
-                  class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
+                  class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-[#D6D0C4] bg-[#FDFCFA] text-sm font-bold text-[#121613]"
                   aria-label="Tambah unit"
                   @click="cart.setAlatQty(item.id, item.qty + 1)"
                 >
@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
             <div class="flex justify-end">
               <button
                 type="button"
-                class="cursor-pointer text-xs font-medium text-[#C2410C] hover:underline"
+                class="min-h-[40px] cursor-pointer px-2 text-xs font-medium text-[#C2410C] hover:underline"
                 @click="cart.clearCart()"
               >
                 Kosongkan Daftar Sewa
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="border-t border-[#EAE5DA] bg-white p-5">
+        <div class="border-t border-[#EAE5DA] bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
           <div class="space-y-1.5 text-xs">
             <div class="flex justify-between text-[#5C645E]">
               <span>Subtotal ({{ estimate.days }} hari)</span>

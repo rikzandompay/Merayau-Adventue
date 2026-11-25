@@ -6,12 +6,41 @@ const cart = usePublicCart()
 
 const { data, pending, error, refresh } = await useFetch('/api/public/landing')
 
+const bookingPanelRef = ref<HTMLElement | null>(null)
+const isBookingPanelVisible = ref(false)
+let bookingIo: IntersectionObserver | null = null
+
+function scrollToBookingPanel() {
+  bookingPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 onMounted(() => {
   cart.initClientCart()
   if (data.value) {
     cart.setCatalogPromos(data.value.promos ?? [])
     cart.syncCatalogPrices(data.value.alat ?? [], data.value.packages ?? [])
   }
+  watch(
+    bookingPanelRef,
+    (el) => {
+      bookingIo?.disconnect()
+      bookingIo = null
+      if (!el || typeof IntersectionObserver === 'undefined') return
+      bookingIo = new IntersectionObserver(
+        (entries) => {
+          isBookingPanelVisible.value = Boolean(entries[0]?.isIntersecting)
+        },
+        { threshold: 0.12 },
+      )
+      bookingIo.observe(el)
+    },
+    { immediate: true },
+  )
+})
+
+onBeforeUnmount(() => {
+  bookingIo?.disconnect()
+  bookingIo = null
 })
 
 const trips = computed<PublicTripItem[]>(() => (data.value?.trips ?? []) as PublicTripItem[])
@@ -274,29 +303,31 @@ const waBookingUrl = computed(() => {
       :whatsapp="kontak.whatsapp"
     />
 
-    <main class="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <main class="mx-auto max-w-[1280px] overflow-x-clip px-4 py-5 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
       <!-- Top Bar & Trip Switcher -->
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#EAE5DA] pb-5">
-        <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-col gap-2.5 border-b border-[#EAE5DA] pb-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:pb-5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <NuxtLink
             to="/#open-trip"
-            class="inline-flex min-h-[42px] items-center rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613] hover:bg-[#F5F2EB]"
+            class="inline-flex min-h-[44px] w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613] hover:bg-[#F5F2EB]"
           >
             ← Kembali ke Beranda
           </NuxtLink>
-          <NuxtLink
-            v-for="other in trips"
-            :key="other.id"
-            :to="`/trip/${other.id}`"
-            class="mry-mono inline-flex min-h-[42px] items-center rounded-full border px-4 text-xs font-semibold transition-colors"
-            :class="
-              other.id === trip?.id
-                ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
-                : 'border-[#D6D0C4] bg-white text-[#2E3530] hover:bg-[#F5F2EB]'
-            "
-          >
-            {{ other.judul }}
-          </NuxtLink>
+          <div class="mry-no-scrollbar flex items-center gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+            <NuxtLink
+              v-for="other in trips"
+              :key="other.id"
+              :to="`/trip/${other.id}`"
+              class="mry-mono inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap rounded-full border px-4 text-xs font-semibold transition-colors"
+              :class="
+                other.id === trip?.id
+                  ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
+                  : 'border-[#D6D0C4] bg-white text-[#2E3530] hover:bg-[#F5F2EB]'
+              "
+            >
+              {{ other.judul }}
+            </NuxtLink>
+          </div>
         </div>
       </div>
 
@@ -339,17 +370,17 @@ const waBookingUrl = computed(() => {
       </div>
 
       <!-- Main 2-Column Booking Layout -->
-      <div v-else class="mt-8 grid items-start gap-8 lg:grid-cols-12">
+      <div v-else class="mt-6 grid items-start gap-6 sm:mt-8 sm:gap-8 lg:grid-cols-12">
         <!-- LEFT COLUMN: Hero + 3-Column Package Comparison + Comparison Table + Itinerary -->
-        <div class="space-y-8 lg:col-span-8">
+        <div class="min-w-0 space-y-6 sm:space-y-8 lg:col-span-8">
           <!-- Trip Hero Summary -->
-          <div class="grid gap-5 rounded-2xl border border-[#EAE5DA] bg-white p-5 sm:grid-cols-12 sm:p-6">
-            <div class="overflow-hidden rounded-xl border border-[#EAE5DA] bg-[#EAE5DA] sm:col-span-5">
+          <div class="grid gap-4 rounded-2xl border border-[#EAE5DA] bg-white p-4 sm:grid-cols-12 sm:gap-5 sm:p-6">
+            <div class="min-w-0 overflow-hidden rounded-xl border border-[#EAE5DA] bg-[#EAE5DA] sm:col-span-5">
               <img :src="trip.fotoUrl" :alt="trip.judul" class="aspect-[4/3] h-full w-full object-cover" />
             </div>
-            <div class="flex flex-col justify-between space-y-3 sm:col-span-7">
+            <div class="flex min-w-0 flex-col justify-between space-y-3 sm:col-span-7">
               <div>
-                <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
+                <div class="mry-mono text-[11px] leading-relaxed font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
                   {{ trip.statusPublish }} · {{ trip.tanggalBerangkat }} · {{ trip.durasi }}
                 </div>
                 <h1 class="mry-serif mt-1.5 text-2xl font-semibold text-[#121613] sm:text-3xl">
@@ -410,7 +441,7 @@ const waBookingUrl = computed(() => {
                 v-for="(pkg, pkgIdx) in trip.pakets"
                 :key="pkg.id"
                 type="button"
-                class="flex h-full cursor-pointer flex-col justify-start rounded-2xl bg-white p-5 text-left transition-all"
+                class="flex h-full min-w-0 cursor-pointer flex-col justify-start rounded-2xl bg-white p-4 text-left transition-all sm:p-5"
                 :class="
                   selectedPaket?.id === pkg.id
                     ? 'border-2 border-[#121613] shadow-sm ring-1 ring-[#121613]/10'
@@ -486,6 +517,7 @@ const waBookingUrl = computed(() => {
           <!-- HARGA PER MEETING POINT -->
           <section
             v-if="mepoPriceRows.length"
+            class="min-w-0"
             aria-labelledby="heading-harga-mepo"
           >
             <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
@@ -496,20 +528,23 @@ const waBookingUrl = computed(() => {
                 <p class="mt-0.5 text-xs text-[#5C645E]">
                   Klik lokasi atau nominal harga di tabel untuk langsung memilih titik kumpul dan paket.
                 </p>
+                <p class="mt-1 text-[11px] font-medium text-[#1E4D36] sm:hidden">
+                  Geser tabel ke samping untuk melihat semua kolom.
+                </p>
               </div>
             </div>
 
             <div class="overflow-hidden rounded-2xl border border-[#EAE5DA] bg-white">
               <div class="overflow-x-auto">
-                <table class="w-full min-w-[540px] text-left text-xs sm:text-sm">
+                <table class="w-full min-w-[460px] text-left text-xs sm:text-sm">
                   <thead class="border-b border-[#EAE5DA] bg-[#F5F2EB] text-xs text-[#5C645E]">
                     <tr>
-                      <th class="px-5 py-3.5 font-semibold text-[#121613]">Meeting point</th>
-                      <th class="px-4 py-3.5 text-right font-semibold text-[#121613]">Paket A</th>
-                      <th class="px-4 py-3.5 text-right font-semibold text-[#121613]">Paket B</th>
+                      <th class="px-3.5 py-3 font-semibold text-[#121613] sm:px-5 sm:py-3.5">Meeting point</th>
+                      <th class="px-3 py-3 text-right font-semibold text-[#121613] sm:px-4 sm:py-3.5">Paket A</th>
+                      <th class="px-3 py-3 text-right font-semibold text-[#121613] sm:px-4 sm:py-3.5">Paket B</th>
                       <th
                         v-if="trip.pakets.length >= 3 || mepoPriceRows.some((r) => r.pkgC && r.pkgC !== '-')"
-                        class="px-5 py-3.5 text-right font-semibold text-[#121613]"
+                        class="px-3.5 py-3 text-right font-semibold text-[#121613] sm:px-5 sm:py-3.5"
                       >
                         Paket C
                       </th>
@@ -521,17 +556,17 @@ const waBookingUrl = computed(() => {
                       :key="rIdx"
                       class="transition-colors hover:bg-[#FDFCFA]"
                     >
-                      <td class="px-5 py-3.5 font-medium text-[#121613]">
+                      <td class="px-3.5 py-3 font-medium text-[#121613] sm:px-5 sm:py-3.5">
                         <button
                           type="button"
-                          class="cursor-pointer text-left hover:text-[#1E4D36] hover:underline"
+                          class="inline-flex min-h-[36px] cursor-pointer items-center text-left hover:text-[#1E4D36] hover:underline"
                           @click="selectMepoAndTier(row.mepo)"
                         >
                           {{ row.mepo }}
                         </button>
                       </td>
                       <td
-                        class="mry-mono px-4 py-3.5 text-right"
+                        class="mry-mono px-3 py-3 text-right sm:px-4 sm:py-3.5"
                         :class="
                           selectedMepo === row.mepo && activeTier === 'pkgA'
                             ? 'bg-[#E6F0EA]/75 font-bold text-[#1E4D36]'
@@ -543,7 +578,7 @@ const waBookingUrl = computed(() => {
                         <button
                           v-if="row.pkgA !== '-'"
                           type="button"
-                          class="cursor-pointer hover:underline"
+                          class="inline-flex min-h-[36px] cursor-pointer items-center justify-end hover:underline"
                           @click="selectMepoAndTier(row.mepo, 'pkgA')"
                         >
                           {{ row.pkgA }}
@@ -551,7 +586,7 @@ const waBookingUrl = computed(() => {
                         <span v-else>-</span>
                       </td>
                       <td
-                        class="mry-mono px-4 py-3.5 text-right"
+                        class="mry-mono px-3 py-3 text-right sm:px-4 sm:py-3.5"
                         :class="
                           selectedMepo === row.mepo && activeTier === 'pkgB'
                             ? 'bg-[#E6F0EA]/75 font-bold text-[#1E4D36]'
@@ -563,7 +598,7 @@ const waBookingUrl = computed(() => {
                         <button
                           v-if="row.pkgB !== '-'"
                           type="button"
-                          class="cursor-pointer hover:underline"
+                          class="inline-flex min-h-[36px] cursor-pointer items-center justify-end hover:underline"
                           @click="selectMepoAndTier(row.mepo, 'pkgB')"
                         >
                           {{ row.pkgB }}
@@ -572,7 +607,7 @@ const waBookingUrl = computed(() => {
                       </td>
                       <td
                         v-if="trip.pakets.length >= 3 || mepoPriceRows.some((r) => r.pkgC && r.pkgC !== '-')"
-                        class="mry-mono px-5 py-3.5 text-right"
+                        class="mry-mono px-3.5 py-3 text-right sm:px-5 sm:py-3.5"
                         :class="
                           selectedMepo === row.mepo && activeTier === 'pkgC'
                             ? 'bg-[#E6F0EA]/75 font-bold text-[#1E4D36]'
@@ -584,7 +619,7 @@ const waBookingUrl = computed(() => {
                         <button
                           v-if="row.pkgC !== '-'"
                           type="button"
-                          class="cursor-pointer hover:underline"
+                          class="inline-flex min-h-[36px] cursor-pointer items-center justify-end hover:underline"
                           @click="selectMepoAndTier(row.mepo, 'pkgC')"
                         >
                           {{ row.pkgC }}
@@ -601,33 +636,34 @@ const waBookingUrl = computed(() => {
           <!-- TABEL PERBANDINGAN FASILITAS LENGKAP -->
           <section
             v-if="trip.detail?.comparisons?.length"
-            class="overflow-hidden rounded-2xl border border-[#EAE5DA] bg-white"
+            class="min-w-0 overflow-hidden rounded-2xl border border-[#EAE5DA] bg-white"
             aria-labelledby="heading-tabel-perbandingan"
           >
-            <div class="border-b border-[#EAE5DA] bg-[#F5F2EB] px-5 py-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#EAE5DA] bg-[#F5F2EB] px-4 py-3 sm:px-5 sm:py-3.5">
               <h2 id="heading-tabel-perbandingan" class="mry-mono text-xs font-bold tracking-wider text-[#121613] uppercase">
                 Tabel Perbandingan Fasilitas Paket
               </h2>
+              <span class="text-[11px] font-medium text-[#5C645E] sm:hidden">Geser ↔</span>
             </div>
             <div class="overflow-x-auto">
-              <table class="w-full min-w-[540px] text-left text-xs">
+              <table class="w-full min-w-[460px] text-left text-xs">
                 <thead class="border-b border-[#EAE5DA] bg-[#FDFCFA] text-[#5C645E]">
                   <tr>
-                    <th class="px-5 py-3 font-semibold">Fasilitas &amp; Layanan</th>
+                    <th class="px-3.5 py-3 font-semibold sm:px-5">Fasilitas &amp; Layanan</th>
                     <th
-                      class="px-4 py-3 font-semibold"
+                      class="px-3 py-3 font-semibold sm:px-4"
                       :class="isActiveTierColumn('pkgA') ? 'bg-[#E6F0EA]/40 text-[#1E4D36]' : ''"
                     >
                       Paket A
                     </th>
                     <th
-                      class="px-4 py-3 font-semibold"
+                      class="px-3 py-3 font-semibold sm:px-4"
                       :class="isActiveTierColumn('pkgB') ? 'bg-[#E6F0EA]/40 text-[#1E4D36]' : ''"
                     >
                       Paket B
                     </th>
                     <th
-                      class="px-4 py-3 font-semibold"
+                      class="px-3.5 py-3 font-semibold sm:px-4"
                       :class="isActiveTierColumn('pkgC') ? 'bg-[#E6F0EA]/40 text-[#1E4D36]' : ''"
                     >
                       Paket C
@@ -636,9 +672,9 @@ const waBookingUrl = computed(() => {
                 </thead>
                 <tbody class="divide-y divide-[#EAE5DA] text-[#2E3530]">
                   <tr v-for="(row, idx) in trip.detail.comparisons" :key="idx">
-                    <td class="px-5 py-3 font-medium text-[#121613]">{{ row.feature }}</td>
+                    <td class="px-3.5 py-3 font-medium text-[#121613] sm:px-5">{{ row.feature }}</td>
                     <td
-                      class="px-4 py-3"
+                      class="px-3 py-3 sm:px-4"
                       :class="[
                         isActiveTierColumn('pkgA') ? 'bg-[#E6F0EA]/20' : '',
                         isIncludedValue(row.pkgA) ? 'font-medium text-[#1E4D36]' : 'text-[#5C645E]',
@@ -647,7 +683,7 @@ const waBookingUrl = computed(() => {
                       {{ formatComparisonCell(row.pkgA) }}
                     </td>
                     <td
-                      class="px-4 py-3"
+                      class="px-3 py-3 sm:px-4"
                       :class="[
                         isActiveTierColumn('pkgB') ? 'bg-[#E6F0EA]/20' : '',
                         isIncludedValue(row.pkgB) ? 'font-medium text-[#1E4D36]' : 'text-[#5C645E]',
@@ -656,7 +692,7 @@ const waBookingUrl = computed(() => {
                       {{ formatComparisonCell(row.pkgB) }}
                     </td>
                     <td
-                      class="px-4 py-3"
+                      class="px-3.5 py-3 sm:px-4"
                       :class="[
                         isActiveTierColumn('pkgC') ? 'bg-[#E6F0EA]/20' : '',
                         isIncludedValue(row.pkgC) ? 'font-medium text-[#1E4D36]' : 'text-[#5C645E]',
@@ -672,7 +708,7 @@ const waBookingUrl = computed(() => {
 
           <!-- RINGKASAN ITINERARY -->
           <section
-            class="rounded-2xl border border-[#EAE5DA] bg-white p-5 sm:p-6"
+            class="min-w-0 rounded-2xl border border-[#EAE5DA] bg-white p-4 sm:p-6"
             aria-labelledby="heading-itinerary"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
@@ -693,7 +729,7 @@ const waBookingUrl = computed(() => {
             >
               <button
                 type="button"
-                class="mry-mono min-h-[36px] cursor-pointer rounded-full border px-3.5 text-xs font-semibold transition-colors"
+                class="mry-mono min-h-[44px] cursor-pointer rounded-full border px-4 text-xs font-semibold transition-colors"
                 :class="
                   activeRouteId === 'default'
                     ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
@@ -707,7 +743,7 @@ const waBookingUrl = computed(() => {
                 v-for="rf in trip.detail.routeFilters"
                 :key="rf.id"
                 type="button"
-                class="mry-mono min-h-[36px] cursor-pointer rounded-full border px-3.5 text-xs font-semibold transition-colors"
+                class="mry-mono min-h-[44px] cursor-pointer rounded-full border px-4 text-xs font-semibold transition-colors"
                 :class="
                   activeRouteId === rf.id
                     ? 'border-[#1E4D36] bg-[#1E4D36] text-white'
@@ -744,8 +780,8 @@ const waBookingUrl = computed(() => {
         </div>
 
         <!-- RIGHT STICKY BOOKING CARD -->
-        <aside class="lg:sticky lg:top-24 lg:col-span-4">
-          <div class="rounded-2xl border border-[#D6D0C4] bg-white p-5 shadow-xs sm:p-6">
+        <aside id="booking-panel" ref="bookingPanelRef" class="min-w-0 lg:sticky lg:top-24 lg:col-span-4">
+          <div class="rounded-2xl border border-[#D6D0C4] bg-white p-4 shadow-xs sm:p-6">
             <div class="border-b border-[#EAE5DA] pb-4">
               <div class="text-xs font-medium text-[#5C645E]">Harga per peserta</div>
               <div class="mry-mono mt-0.5 text-2xl font-bold text-[#1E4D36]">
@@ -835,10 +871,10 @@ const waBookingUrl = computed(() => {
               <!-- Peserta -->
               <div>
                 <label class="mb-1.5 block text-xs font-semibold text-[#121613]">Peserta</label>
-                <div class="flex h-[44px] items-center justify-between rounded-xl border border-[#D6D0C4] bg-white px-2">
+                <div class="flex h-[46px] items-center justify-between rounded-xl border border-[#D6D0C4] bg-white px-1.5">
                   <button
                     type="button"
-                    class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-base font-bold text-[#121613] hover:bg-[#F5F2EB]"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-base font-bold text-[#121613] hover:bg-[#F5F2EB]"
                     aria-label="Kurangi peserta"
                     @click="jumlahPeserta = Math.max(1, jumlahPeserta - 1)"
                   >
@@ -849,7 +885,7 @@ const waBookingUrl = computed(() => {
                   </span>
                   <button
                     type="button"
-                    class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-base font-bold text-[#121613] hover:bg-[#F5F2EB]"
+                    class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-base font-bold text-[#121613] hover:bg-[#F5F2EB]"
                     aria-label="Tambah peserta"
                     @click="jumlahPeserta = Math.min(Math.max(1, trip.sisaKuota || 10), jumlahPeserta + 1)"
                   >
@@ -908,5 +944,29 @@ const waBookingUrl = computed(() => {
     />
 
     <PublicRentalCartDrawer :aturan="aturan" :whatsapp="kontak.whatsapp" :promos="data?.promos" />
+
+    <!-- Mobile Quick Booking Bar (hidden when #booking-panel is visible) -->
+    <div
+      v-if="trip && !isBookingPanelVisible"
+      class="fixed inset-x-0 bottom-0 z-30 border-t border-[#EAE5DA] bg-white/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(18,22,19,0.08)] backdrop-blur-md lg:hidden"
+    >
+      <div class="mx-auto flex max-w-[1280px] items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="mry-mono truncate text-[10px] font-semibold tracking-wider text-[#5C645E] uppercase">
+            {{ selectedPaket?.kodePaket || 'Paket A' }} · per peserta
+          </div>
+          <div class="mry-mono text-base font-bold text-[#1E4D36]">
+            {{ formatRupiah(activeUnitPrice) }}
+          </div>
+        </div>
+        <button
+          type="button"
+          class="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1E4D36] px-5 text-xs font-semibold text-white transition-colors hover:bg-[#163B29]"
+          @click="scrollToBookingPanel"
+        >
+          Pilih &amp; Booking ↓
+        </button>
+      </div>
+    </div>
   </div>
 </template>

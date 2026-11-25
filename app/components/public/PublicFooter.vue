@@ -59,7 +59,7 @@ const mapsEmbedUrl = computed(() => {
 
 <template>
   <footer class="overflow-x-clip border-t border-white/10 bg-[#121613] text-[#F5F2EB]">
-    <div class="mx-auto max-w-[1280px] px-4 py-14 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
       <!-- Top Brand & Trust Strip -->
       <div data-reveal style="--reveal-delay: 0ms" class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-8">
         <div class="flex items-center gap-3.5">
@@ -86,9 +86,9 @@ const mapsEmbedUrl = computed(() => {
       </div>
 
       <!-- 4 Columns Grid -->
-      <div data-reveal-stagger class="grid gap-10 py-10 md:grid-cols-2 lg:grid-cols-12">
+      <div data-reveal-stagger class="grid gap-8 py-8 sm:gap-10 sm:py-10 md:grid-cols-2 lg:grid-cols-12">
         <!-- Col 1: Lokasi Basecamp -->
-        <div class="mry-stagger-item space-y-3.5 lg:col-span-4" style="--stagger-delay: 0ms">
+        <div class="mry-stagger-item min-w-0 space-y-3.5 lg:col-span-4" style="--stagger-delay: 0ms">
           <div class="flex items-center justify-between">
             <h3 class="mry-mono text-xs font-semibold tracking-[0.12em] text-white uppercase">
               Lokasi Basecamp
@@ -137,7 +137,7 @@ const mapsEmbedUrl = computed(() => {
         </div>
 
         <!-- Col 2: Menu Pilihan -->
-        <div class="mry-stagger-item lg:col-span-2" style="--stagger-delay: 80ms">
+        <div class="mry-stagger-item min-w-0 lg:col-span-2" style="--stagger-delay: 80ms">
           <h3 class="mry-mono text-xs font-semibold tracking-[0.12em] text-white uppercase">
             Menu Pilihan
           </h3>
@@ -155,7 +155,7 @@ const mapsEmbedUrl = computed(() => {
         </div>
 
         <!-- Col 3: Rekening Pembayaran -->
-        <div class="mry-stagger-item space-y-3.5 lg:col-span-4" style="--stagger-delay: 160ms">
+        <div class="mry-stagger-item min-w-0 space-y-3.5 lg:col-span-4" style="--stagger-delay: 160ms">
           <h3 class="mry-mono text-xs font-semibold tracking-[0.12em] text-white uppercase">
             Rekening Pembayaran Resmi
           </h3>
@@ -176,7 +176,7 @@ const mapsEmbedUrl = computed(() => {
               </div>
               <button
                 type="button"
-                class="min-h-[36px] cursor-pointer rounded-lg border px-3 text-xs font-semibold transition-colors"
+                class="min-h-[44px] cursor-pointer rounded-lg border px-3.5 text-xs font-semibold transition-colors"
                 :class="
                   copiedKey === 'bca'
                     ? 'border-[#93B47E] bg-[#1E4D36] text-white'
@@ -202,7 +202,7 @@ const mapsEmbedUrl = computed(() => {
               </div>
               <button
                 type="button"
-                class="min-h-[36px] cursor-pointer rounded-lg border px-3 text-xs font-semibold transition-colors"
+                class="min-h-[44px] cursor-pointer rounded-lg border px-3.5 text-xs font-semibold transition-colors"
                 :class="
                   copiedKey === 'bri'
                     ? 'border-[#93B47E] bg-[#1E4D36] text-white'
@@ -217,7 +217,7 @@ const mapsEmbedUrl = computed(() => {
         </div>
 
         <!-- Col 4: Kontak & Media Sosial -->
-        <div class="mry-stagger-item space-y-4 lg:col-span-2" style="--stagger-delay: 240ms">
+        <div class="mry-stagger-item min-w-0 space-y-4 lg:col-span-2" style="--stagger-delay: 240ms">
           <h3 class="mry-mono text-xs font-semibold tracking-[0.12em] text-white uppercase">
             Kontak Kami
           </h3>
@@ -249,7 +249,7 @@ const mapsEmbedUrl = computed(() => {
                 :href="waUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#93B47E] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#93B47E] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
                 aria-label="WhatsApp Merayau Adventure"
               >
                 <WaIcon :size="17" />
@@ -258,7 +258,7 @@ const mapsEmbedUrl = computed(() => {
                 href="https://www.instagram.com/merayauadventure/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#E5E9E6] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#E5E9E6] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
                 aria-label="Instagram Merayau Adventure"
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -271,7 +271,7 @@ const mapsEmbedUrl = computed(() => {
                 href="https://www.tiktok.com/@merayauadventure"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#E5E9E6] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-[#191E1A] text-[#E5E9E6] transition-colors hover:border-[#93B47E] hover:bg-[#1E4D36] hover:text-white"
                 aria-label="TikTok Merayau Adventure"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">

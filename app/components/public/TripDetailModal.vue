@@ -169,11 +169,11 @@ const waBookingUrl = computed(() => {
 
         <div class="flex-1 space-y-6 overflow-y-auto p-5 sm:p-7">
           <div class="grid gap-5 md:grid-cols-5">
-            <div class="overflow-hidden rounded-xl border border-[#EAE5DA] bg-[#EAE5DA] md:col-span-2">
+            <div class="min-w-0 overflow-hidden rounded-xl border border-[#EAE5DA] bg-[#EAE5DA] md:col-span-2">
               <img :src="trip.fotoUrl" :alt="trip.judul" class="h-56 w-full object-cover md:h-full" />
             </div>
 
-            <div class="space-y-4 md:col-span-3">
+            <div class="min-w-0 space-y-4 md:col-span-3">
               <div class="flex flex-wrap gap-2">
                 <span class="mry-mono rounded-full border border-[#D6D0C4] bg-white px-3 py-1 text-xs font-medium text-[#2E3530]">
                   Lokasi: {{ trip.lokasi }}
@@ -363,10 +363,10 @@ const waBookingUrl = computed(() => {
             </div>
           </div>
 
-          <div class="flex items-center gap-2.5">
+          <div class="flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center">
             <button
               type="button"
-              class="min-h-[44px] cursor-pointer rounded-full border border-[#D6D0C4] bg-white px-4 text-sm font-semibold text-[#121613] hover:bg-[#F5F2EB]"
+              class="min-h-[44px] w-full cursor-pointer rounded-full border border-[#D6D0C4] bg-white px-4 text-sm font-semibold text-[#121613] hover:bg-[#F5F2EB] sm:w-auto"
               @click="emit('close')"
             >
               Tutup
@@ -375,7 +375,7 @@ const waBookingUrl = computed(() => {
               :href="waBookingUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-[#1E4D36] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#163B29]"
+              class="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-[#1E4D36] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#163B29] sm:w-auto"
             >
               <WaIcon :size="16" />
               <span>Booking Kursi via WhatsApp</span>

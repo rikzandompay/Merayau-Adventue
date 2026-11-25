@@ -25,6 +25,20 @@ watch(
   },
 )
 
+function onNavbarKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && mobileOpen.value) {
+    mobileOpen.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onNavbarKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onNavbarKeydown)
+})
+
 const navLinks = computed(() => [
   { label: 'Profile', to: '/#profil-merayau', sectionId: 'profil-merayau', isRoute: false },
   { label: `Katalog Alat (${props.totalAlat})`, to: '/katalog', sectionId: '', isRoute: true },
@@ -51,17 +65,17 @@ const waUrl = computed(() =>
 
 <template>
   <header class="sticky top-0 z-40 border-b border-[#EAE5DA] bg-white/95 backdrop-blur-md">
-    <div class="mx-auto flex h-[74px] max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-      <NuxtLink to="/" class="flex items-center gap-3 rounded-lg py-1 pr-2">
-        <div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-[#D6D0C4] bg-white p-0.5 shadow-xs">
+    <div class="mx-auto flex h-[64px] max-w-[1280px] items-center justify-between gap-2 px-3 sm:h-[74px] sm:gap-4 sm:px-6 lg:px-8">
+      <NuxtLink to="/" class="flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1 pr-0.5 sm:gap-3 sm:pr-2 lg:flex-none">
+        <div class="h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-[#D6D0C4] bg-white p-0.5 shadow-xs sm:h-10 sm:w-10">
           <img src="/images/logo.jpeg" alt="Merayau Adventure" class="h-full w-full object-contain" />
         </div>
         <div class="min-w-0">
-          <div class="text-sm font-bold tracking-[0.06em] text-[#121613] uppercase">
+          <div class="truncate whitespace-nowrap text-[11px] font-bold tracking-[0.04em] text-[#121613] uppercase sm:text-sm sm:tracking-[0.06em]">
             Merayau Adventure
           </div>
-          <div class="mry-mono text-[10px] font-medium tracking-[0.08em] text-[#5C645E] uppercase">
-            Est. 2019 · Basecamp Pontianak
+          <div class="mry-mono truncate whitespace-nowrap text-[9px] font-medium tracking-[0.05em] text-[#5C645E] uppercase sm:text-[10px] sm:tracking-[0.08em]">
+            <span class="hidden sm:inline">Est. 2019 · </span>Basecamp Pontianak
           </div>
         </div>
       </NuxtLink>
@@ -82,10 +96,10 @@ const waUrl = computed(() =>
         </NuxtLink>
       </nav>
 
-      <div class="flex items-center gap-2.5">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         <button
           type="button"
-          class="relative inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border border-[#D6D0C4] bg-[#FDFCFA] px-3.5 py-2 text-xs font-semibold text-[#121613] transition-colors hover:border-[#1E4D36] hover:bg-[#F5F2EB]"
+          class="relative inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-full border border-[#D6D0C4] bg-[#FDFCFA] px-2.5 py-2 text-xs font-semibold text-[#121613] transition-colors hover:border-[#1E4D36] hover:bg-[#F5F2EB] sm:gap-2 sm:px-3.5"
           aria-label="Buka Daftar Sewa Kamu"
           @click="cart.drawerOpen.value = true"
         >
@@ -119,17 +133,18 @@ const waUrl = computed(() =>
 
         <button
           type="button"
-          class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-[#D6D0C4] bg-white text-[#121613] lg:hidden"
+          class="inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-xl border border-[#D6D0C4] bg-white px-2.5 text-xs font-semibold text-[#121613] sm:px-3 lg:hidden"
           :aria-expanded="mobileOpen"
           aria-label="Buka menu navigasi"
           @click="mobileOpen = !mobileOpen"
         >
-          <svg v-if="!mobileOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <svg v-if="!mobileOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           </svg>
-          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
           </svg>
+          <span>{{ mobileOpen ? 'Tutup' : 'Menu' }}</span>
         </button>
       </div>
     </div>
