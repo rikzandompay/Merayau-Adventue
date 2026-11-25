@@ -64,6 +64,8 @@ interface DashboardResponse {
     ringkasanItem: string
     durasiHari: number
     totalBiayaSewa: number
+    dendaTelat: number
+    dendaRusak: number
     tanggalKembaliRencana: string
     statusSewa: 'Disewa' | 'Terlambat' | 'Selesai'
   }>
@@ -245,32 +247,19 @@ function txBadgeTone(status: string): 'good' | 'bad' | 'accent' | 'neutral' {
 
 function exportCsv() {
   const rows = filteredRecent.value
-  if (!rows.length || !import.meta.client) return
-  const headers = ['Kode Sewa', 'Penyewa', 'Item', 'Durasi (Hari)', 'Total Biaya', 'Tenggat Kembali', 'Status']
-  const escape = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
-  const csv = [
-    headers.map(escape).join(','),
-    ...rows.map((r) =>
-      [
-        r.kodeSewa,
-        r.penyewaNama,
-        r.ringkasanItem,
-        r.durasiHari,
-        r.totalBiayaSewa,
-        r.tanggalKembaliRencana,
-        r.statusSewa,
-      ]
-        .map(escape)
-        .join(','),
-    ),
-  ].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `merayau-transaksi-${period.value}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadCsv(
+    `merayau-transaksi-${period.value}.csv`,
+    ['Kode Sewa', 'Penyewa', 'Item', 'Durasi (Hari)', 'Total Biaya', 'Tenggat Kembali', 'Status'],
+    rows.map((r) => [
+      r.kodeSewa,
+      r.penyewaNama,
+      r.ringkasanItem,
+      r.durasiHari,
+      r.totalBiayaSewa,
+      r.tanggalKembaliRencana,
+      r.statusSewa,
+    ]),
+  )
 }
 </script>
 
@@ -722,7 +711,7 @@ function exportCsv() {
                       {{ tx.penyewaNama }}
                     </td>
                     <td class="px-4 py-3 tabular text-xs font-semibold">
-                      <NuxtLink :to="`/admin/sewa?kode=${tx.kodeSewa}`" class="hover:underline"
+                      <NuxtLink :to="`/admin/transaksi?kode=${encodeURIComponent(tx.kodeSewa)}`" class="hover:underline"
                         style="color: var(--srf-accent)">
                         {{ tx.kodeSewa }}
                       </NuxtLink>

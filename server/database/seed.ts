@@ -16,7 +16,6 @@ import {
 } from './schema'
 import { hashPassword } from '../utils/auth'
 import { closeDb, useDb } from '../utils/db'
-import { computePackagePrice } from '../utils/inventory'
 
 try {
   process.loadEnvFile?.()

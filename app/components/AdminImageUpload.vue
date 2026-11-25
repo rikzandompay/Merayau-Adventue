@@ -53,11 +53,7 @@ async function handleFileChange(event: Event) {
     emit('update:modelValue', res.url)
     lastInfo.value = `${res.filename} · ${Math.max(1, Math.round(res.sizeBytes / 1024))} KB`
   } catch (err: unknown) {
-    const msg =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      (err as { statusMessage?: string })?.statusMessage ||
-      'Gagal mengunggah gambar.'
-    uploadError.value = msg
+    uploadError.value = extractErrorMessage(err, 'Gagal mengunggah gambar.')
   } finally {
     uploading.value = false
     input.value = ''

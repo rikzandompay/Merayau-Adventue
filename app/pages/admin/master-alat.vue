@@ -38,7 +38,7 @@ const search = ref('')
 const showCatManager = ref(false)
 const newCategoryName = ref('')
 
-const [{ data: alatRes, refresh: refreshAlat }, { data: settingRes, refresh: refreshSetting }] =
+const [{ data: alatRes, refresh: refreshAlat }, { data: settingRes }] =
   await Promise.all([
     useFetch<{ items: AlatRow[]; categories: KategoriRow[]; allCount: number }>('/api/admin/alat'),
     useFetch<SettingRow>('/api/admin/pengaturan-sewa'),
@@ -100,7 +100,8 @@ if (alatRes.value?.items?.[0]) {
 function startCreateNew() {
   isCreateMode.value = true
   selectedId.value = null
-  form.kodeAlat = `ALT-${Date.now().toString().slice(-4)}`
+  const rand = Math.random().toString(36).slice(2, 4).toUpperCase()
+  form.kodeAlat = `ALT-${Date.now().toString(36).slice(-4).toUpperCase()}${rand}`
   form.idKategori = alatRes.value?.categories?.[0]?.id ?? 0
   form.namaAlat = ''
   form.spesifikasi = ''
@@ -131,9 +132,7 @@ async function saveAlat() {
   } catch (err: unknown) {
     alatFeedback.value = {
       type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Gagal menyimpan data alat.',
+      msg: extractErrorMessage(err, 'Gagal menyimpan data alat.'),
     }
   } finally {
     savingAlat.value = false
@@ -159,21 +158,29 @@ async function deleteOrDisableAlat() {
   } catch (err: unknown) {
     alatFeedback.value = {
       type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Gagal memproses penghapusan alat.',
+      msg: extractErrorMessage(err, 'Gagal memproses penghapusan alat.'),
     }
   }
 }
 
 async function addCategory() {
-  if (!newCategoryName.value.trim()) return
-  await $fetch('/api/admin/kategori', {
-    method: 'POST',
-    body: { namaKategori: newCategoryName.value.trim() },
-  })
-  newCategoryName.value = ''
-  await refreshAlat()
+  const nama = newCategoryName.value.trim()
+  if (!nama) return
+  alatFeedback.value = null
+  try {
+    await $fetch('/api/admin/kategori', {
+      method: 'POST',
+      body: { namaKategori: nama },
+    })
+    newCategoryName.value = ''
+    await refreshAlat()
+    alatFeedback.value = { type: 'ok', msg: `Kategori "${nama}" ditambahkan.` }
+  } catch (err: unknown) {
+    alatFeedback.value = {
+      type: 'err',
+      msg: extractErrorMessage(err, 'Gagal menambah kategori.'),
+    }
+  }
 }
 
 async function removeCategory(id: number) {
@@ -184,35 +191,18 @@ async function removeCategory(id: number) {
   } catch (err: unknown) {
     alatFeedback.value = {
       type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Kategori gagal dihapus.',
+      msg: extractErrorMessage(err, 'Kategori gagal dihapus.'),
     }
   }
 }
 
-const ruleForm = reactive({
-  namaAturan: settingRes.value?.namaAturan ?? 'Reguler Basecamp Sleman',
+const ruleForm = computed(() => ({
   durasiDasarJam: settingRes.value?.durasiDasarJam ?? 24,
   minHariPromo: settingRes.value?.minHariPromo ?? 3,
   diskonPersen: settingRes.value?.diskonPersen ?? 15,
   toleransiTelatJam: settingRes.value?.toleransiTelatJam ?? 2,
   dendaPersenHarian: settingRes.value?.dendaPersenHarian ?? 50,
-})
-const savingRule = ref(false)
-const ruleMsg = ref('')
-
-async function saveRule() {
-  savingRule.value = true
-  ruleMsg.value = ''
-  try {
-    await $fetch('/api/admin/pengaturan-sewa', { method: 'PUT', body: ruleForm })
-    ruleMsg.value = 'Aturan tarif & denda diperbarui.'
-    await refreshSetting()
-  } finally {
-    savingRule.value = false
-  }
-}
+}))
 </script>
 
 <template>

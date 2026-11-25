@@ -45,30 +45,12 @@ interface SewaSetting {
   dendaPersenHarian: number
 }
 
-interface TransaksiRow {
-  id: number
-  kodeSewa: string
-  penyewaNama: string
-  jenisJaminan: string
-  tanggalPinjam: string
-  tanggalKembaliRencana: string
-  durasiHari: number
-  totalBiayaSewa: number
-  dendaTelat: number
-  dendaRusak: number
-  estimasiDendaTelat: number
-  terlambatJam: number
-  statusSewa: 'Disewa' | 'Terlambat' | 'Selesai'
-  items: Array<{ namaAlat: string; jumlah: number }>
-}
-
-const route = useRoute()
 const [
   { data: alatRes },
   { data: paketRes },
   { data: promoRes },
   { data: penyewaRes, refresh: refreshPenyewa },
-  { data: txRes, refresh: refreshTx },
+  { data: settingRes },
 ] = await Promise.all([
   useFetch<{ items: AlatOption[]; categories: KategoriOption[] }>('/api/admin/alat'),
   useFetch<PaketOption[]>('/api/admin/paket-alat'),
@@ -83,7 +65,7 @@ const [
     statusAktif: boolean
   }>>('/api/admin/promo-diskon'),
   useFetch<PenyewaOption[]>('/api/admin/penyewa'),
-  useFetch<{ transactions: TransaksiRow[]; setting: SewaSetting }>('/api/admin/transaksi'),
+  useFetch<SewaSetting>('/api/admin/pengaturan-sewa'),
 ])
 
 const now = new Date()
@@ -151,11 +133,11 @@ function addPaketLine() {
 }
 
 const setting = computed<SewaSetting>(() => ({
-  durasiDasarJam: txRes.value?.setting?.durasiDasarJam ?? 24,
-  minHariPromo: txRes.value?.setting?.minHariPromo ?? 3,
-  diskonPersen: txRes.value?.setting?.diskonPersen ?? 15,
-  toleransiTelatJam: txRes.value?.setting?.toleransiTelatJam ?? 2,
-  dendaPersenHarian: txRes.value?.setting?.dendaPersenHarian ?? 50,
+  durasiDasarJam: settingRes.value?.durasiDasarJam ?? 24,
+  minHariPromo: settingRes.value?.minHariPromo ?? 3,
+  diskonPersen: settingRes.value?.diskonPersen ?? 15,
+  toleransiTelatJam: settingRes.value?.toleransiTelatJam ?? 2,
+  dendaPersenHarian: settingRes.value?.dendaPersenHarian ?? 50,
 }))
 
 const durationDays = computed(() => {
@@ -277,90 +259,35 @@ async function submitRental() {
     form.namaPenyewa = ''
     form.noWa = ''
     form.alamat = ''
-    await Promise.all([refreshTx(), refreshPenyewa(), refreshNuxtData()])
+    await Promise.all([refreshPenyewa(), refreshNuxtData()])
   } catch (err: unknown) {
     feedback.value = {
       type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Gagal menyimpan transaksi sewa.',
+      msg: extractErrorMessage(err, 'Gagal menyimpan transaksi sewa.'),
     }
   } finally {
     saving.value = false
-  }
-}
-
-const activeTransactions = computed(() =>
-  (txRes.value?.transactions ?? []).filter((t) => t.statusSewa !== 'Selesai'),
-)
-
-const selectedReturnId = ref<number>(0)
-watch(
-  activeTransactions,
-  (list) => {
-    const qId = Number(route.query.returnId || 0)
-    if (qId && list.some((t) => t.id === qId)) {
-      selectedReturnId.value = qId
-      return
-    }
-    if (!selectedReturnId.value || !list.some((t) => t.id === selectedReturnId.value)) {
-      selectedReturnId.value = list[0]?.id ?? 0
-    }
-  },
-  { immediate: true },
-)
-
-const selectedReturnTx = computed(
-  () => activeTransactions.value.find((t) => t.id === selectedReturnId.value) ?? null,
-)
-const returnDamageFee = ref(0)
-const returnCondition = ref('Baik & Lengkap')
-const returning = ref(false)
-const returnMsg = ref<{ type: 'ok' | 'err'; msg: string } | null>(null)
-
-async function submitReturn() {
-  if (!selectedReturnTx.value) return
-  returnMsg.value = null
-  returning.value = true
-  try {
-    await $fetch(`/api/admin/transaksi/${selectedReturnTx.value.id}/kembali`, {
-      method: 'PATCH',
-      body: {
-        dendaRusak: returnDamageFee.value,
-        kondisiKembali: returnCondition.value,
-      },
-    })
-    returnMsg.value = {
-      type: 'ok',
-      msg: `Pengembalian ${selectedReturnTx.value.kodeSewa} berhasil diselesaikan.`,
-    }
-    returnDamageFee.value = 0
-    await refreshTx()
-  } catch (err: unknown) {
-    returnMsg.value = {
-      type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Gagal menyelesaikan pengembalian.',
-    }
-  } finally {
-    returning.value = false
   }
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <div>
-      <p class="ed-label" style="color: var(--srf-accent)">
-        TRANSAKSI BARU &amp; PENGEMBALIAN
-      </p>
-      <h1 class="font-serif-display text-3xl font-bold tracking-tight">
-        Catat Sewa &amp; Pengembalian Alat
-      </h1>
-      <p class="mt-1 text-sm" style="color: var(--srf-ink-2)">
-        Catat penyewaan alat satuan atau paket alat dengan pengecekan stok otomatis, serta proses pengembalian dan denda keterlambatan.
-      </p>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <p class="ed-label" style="color: var(--srf-accent)">
+          TRANSAKSI SEWA BARU
+        </p>
+        <h1 class="font-serif-display text-3xl font-bold tracking-tight">
+          Catat Sewa Alat
+        </h1>
+        <p class="mt-1 text-sm" style="color: var(--srf-ink-2)">
+          Catat penyewaan alat satuan atau paket alat dengan pengecekan stok otomatis. Pengembalian &amp; denda dikelola di menu Alat Disewa.
+        </p>
+      </div>
+      <NuxtLink to="/admin/alat-disewa" class="ed-btn-secondary !text-xs">
+        Kelola Pengembalian di Alat Disewa →
+      </NuxtLink>
     </div>
 
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-12">
@@ -608,80 +535,6 @@ async function submitReturn() {
           >
             {{ saving ? 'Menyimpan...' : 'Simpan Transaksi Sewa' }}
           </button>
-        </div>
-
-        <div class="ed-card p-5 space-y-3.5">
-          <div>
-            <p class="ed-label" style="color: var(--srf-bad)">PROSES PENGEMBALIAN &amp; DENDA</p>
-            <h2 class="text-sm font-semibold">Selesaikan Pengembalian Barang</h2>
-          </div>
-
-          <div v-if="!activeTransactions.length" class="text-xs" style="color: var(--srf-ink-3)">
-            Tidak ada transaksi sewa yang aktif saat ini.
-          </div>
-
-          <template v-else-if="selectedReturnTx">
-            <div class="space-y-1.5">
-              <label class="ed-label">PILIH TRANSAKSI AKTIF</label>
-              <select v-model="selectedReturnId" class="ed-select !text-xs">
-                <option v-for="tx in activeTransactions" :key="tx.id" :value="tx.id">
-                  {{ tx.kodeSewa }} · {{ tx.penyewaNama }} ({{ tx.statusSewa }})
-                </option>
-              </select>
-            </div>
-
-            <div class="ed-well p-3 space-y-1 text-xs">
-              <div class="flex justify-between">
-                <span>Rencana kembali</span>
-                <span class="tabular font-medium">
-                  {{ formatDateTimeShort(selectedReturnTx.tanggalKembaliRencana) }}
-                </span>
-              </div>
-              <div class="flex justify-between">
-                <span>Estimasi denda telat</span>
-                <span
-                  class="tabular font-semibold"
-                  :style="{
-                    color:
-                      selectedReturnTx.estimasiDendaTelat > 0 ? 'var(--srf-bad)' : 'var(--srf-good)',
-                  }"
-                >
-                  {{ formatRupiah(selectedReturnTx.estimasiDendaTelat) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ed-label">DENDA KERUSAKAN FISIK (OPSIONAL)</label>
-              <input v-model.number="returnDamageFee" type="number" min="0" class="ed-input tabular" />
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ed-label">KONDISI BARANG KEMBALI</label>
-              <input v-model="returnCondition" type="text" class="ed-input" />
-            </div>
-
-            <div
-              v-if="returnMsg"
-              class="rounded-md border px-3 py-2 text-xs font-medium"
-              :style="{
-                backgroundColor: 'var(--srf-well)',
-                borderColor: returnMsg.type === 'ok' ? 'var(--srf-good)' : 'var(--srf-bad)',
-                color: returnMsg.type === 'ok' ? 'var(--srf-good)' : 'var(--srf-bad)',
-              }"
-            >
-              {{ returnMsg.msg }}
-            </div>
-
-            <button
-              type="button"
-              class="ed-btn-wa w-full !py-2"
-              :disabled="returning"
-              @click="submitReturn"
-            >
-              {{ returning ? 'Memproses...' : 'Selesaikan Pengembalian' }}
-            </button>
-          </template>
         </div>
       </div>
     </div>

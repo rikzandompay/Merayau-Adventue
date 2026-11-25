@@ -28,11 +28,6 @@ export async function getActiveRentedMap(
   return map
 }
 
-export function computePackagePrice(dailySum: number, diskonPersen = 30): number {
-  const clamped = Math.min(100, Math.max(0, diskonPersen))
-  return Math.max(0, Math.round((dailySum * (100 - clamped)) / 100))
-}
-
 export function computePackageQuota(
   items: Array<{ idAlat: number; jumlah: number }>,
   availableMap: Map<number, number>,

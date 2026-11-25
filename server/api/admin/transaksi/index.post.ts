@@ -283,7 +283,7 @@ export default defineEventHandler(async (event) => {
         ? Math.round((subtotal * rule.diskonPersen) / 100)
         : 0
     const totalBiayaSewa = Math.max(0, subtotal - diskonNominal)
-    const kodeSewa = `TRX-${Date.now().toString().slice(-6)}`
+    const kodeSewa = generateUniqueKode('TRX')
 
     const [ins] = await tx.insert(transaksiSewa).values({
       kodeSewa,

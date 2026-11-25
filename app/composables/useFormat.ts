@@ -44,3 +44,36 @@ export function buildWaLink(phone: string, text?: string): string {
   return text ? `${base}?text=${encodeURIComponent(text)}` : base
 }
 
+export function extractErrorMessage(err: unknown, fallback: string): string {
+  const e = err as { data?: { statusMessage?: string }; statusMessage?: string }
+  return e?.data?.statusMessage || e?.statusMessage || fallback
+}
+
+export function toLocalDateKey(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+export function rowDateKey(iso: string): string {
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '' : toLocalDateKey(d)
+}
+
+export function downloadCsv(filename: string, headers: string[], rows: unknown[][]): void {
+  if (!rows.length || !import.meta.client) return
+  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const csv = [
+    headers.map(esc).join(','),
+    ...rows.map((r) => r.map(esc).join(',')),
+  ].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+

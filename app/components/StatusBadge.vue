@@ -9,7 +9,7 @@ const props = withDefaults(
   }>(),
   {
     tone: 'neutral',
-    variant: 'ou qtline',
+    variant: 'outline',
     caret: null,
     showDot: true,
   },

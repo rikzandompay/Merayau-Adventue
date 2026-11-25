@@ -47,6 +47,7 @@ interface TripDetailData {
   tipeTrip?: string
   deskripsi?: string
   gallery?: string[]
+  galleryItems?: Array<{ src: string; label?: string; tag?: string }>
   packageCards?: TripPackageCard[]
   comparisons?: TripFeatureComparison[]
   mepoPrices?: TripMepoPrice[]
@@ -106,6 +107,7 @@ interface EditTripForm {
   kuota: number
   foto: string | null
   gallery: string[]
+  galleryMetaBySrc: Record<string, { label: string; tag: string }>
   statusPublish: 'Published' | 'Draft' | 'Penuh'
   elevation: string
   difficulty: (typeof DIFFICULTIES)[number]
@@ -175,6 +177,7 @@ function emptyTripForm(): EditTripForm {
     kuota: 20,
     foto: null,
     gallery: [],
+    galleryMetaBySrc: {},
     statusPublish: 'Draft',
     elevation: '',
     difficulty: 'Menengah',
@@ -313,6 +316,11 @@ function openEdit(trip: TripRow) {
     kuota: trip.kuota,
     foto: trip.foto,
     gallery: (d.gallery ?? []).filter((g) => Boolean(g?.trim())),
+    galleryMetaBySrc: Object.fromEntries(
+      (d.galleryItems ?? [])
+        .filter((it) => Boolean(it?.src?.trim()))
+        .map((it) => [it.src.trim(), { label: it.label ?? '', tag: it.tag ?? '' }]),
+    ),
     statusPublish: trip.statusPublish,
     elevation: d.elevation || '',
     difficulty: diffVal,
@@ -534,12 +542,18 @@ async function handleSave() {
     }
   })
 
+  const cleanGallery = f.gallery.map((g) => (g ?? '').trim()).filter(Boolean).slice(0, 5)
   const detailPayload: TripDetailData = {
     elevation: f.elevation.trim(),
     difficulty: f.difficulty,
     tipeTrip: f.tipeTrip.trim(),
     deskripsi: f.deskripsi.trim(),
-    gallery: f.gallery.map((g) => g.trim()).filter(Boolean).slice(0, 5),
+    gallery: cleanGallery,
+    galleryItems: cleanGallery.map((src) => ({
+      src,
+      label: f.galleryMetaBySrc[src]?.label ?? '',
+      tag: f.galleryMetaBySrc[src]?.tag ?? '',
+    })),
     packageCards: f.packageCards.map((c) => ({
       ...c,
       harga: Math.max(1000, Math.round(Number(c.harga) || 350000)),
@@ -575,11 +589,9 @@ async function handleSave() {
       showToast('Data trip berhasil diperbarui.')
     }
     editForm.value = null
-    await refresh()
+    await Promise.all([refresh(), refreshNuxtData()])
   } catch (err: unknown) {
-    modalErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal menyimpan data trip.'
+    modalErr.value = extractErrorMessage(err, 'Gagal menyimpan data trip.')
   } finally {
     saving.value = false
   }
@@ -595,13 +607,10 @@ async function toggleStatus(trip: TripRow) {
       method: 'PUT',
       body: { statusPublish: nextStatus },
     })
-    await refresh()
+    await Promise.all([refresh(), refreshNuxtData()])
     showToast(`Status ${trip.judul} diubah ke ${nextStatus}.`)
   } catch (err: unknown) {
-    showToast(
-      (err as { data?: { statusMessage?: string } })?.data?.statusMessage ||
-      'Gagal mengubah status trip.',
-    )
+    showToast(extractErrorMessage(err, 'Gagal mengubah status trip.'))
   } finally {
     togglingId.value = null
   }
@@ -620,12 +629,10 @@ async function confirmDelete() {
     await $fetch(`/api/admin/trips/${deleteTarget.value.id}`, { method: 'DELETE' })
     const name = deleteTarget.value.judul
     deleteTarget.value = null
-    await refresh()
+    await Promise.all([refresh(), refreshNuxtData()])
     showToast(`Trip "${name}" dihapus.`)
   } catch (err: unknown) {
-    deleteErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Trip tidak dapat dihapus.'
+    deleteErr.value = extractErrorMessage(err, 'Trip tidak dapat dihapus.')
   } finally {
     deleting.value = false
   }
@@ -968,7 +975,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div v-for="(pkg, idx) in editForm.packageCards" :key="pkg.kodePaket" class="ed-well space-y-2.5 p-3">
+              <div v-for="pkg in editForm.packageCards" :key="pkg.kodePaket" class="ed-well space-y-2.5 p-3">
                 <div class="flex items-center justify-between">
                   <span class="rounded px-2 py-0.5 text-[11px] font-semibold"
                     style="background-color: var(--srf-accent); color: var(--srf-btn-ink)">

@@ -40,12 +40,19 @@ export interface TripPackageCard {
   tag?: string
 }
 
+export interface TripGalleryItem {
+  src: string
+  label?: string
+  tag?: string
+}
+
 export interface TripDetailData {
   elevation?: string
   difficulty?: string
   tipeTrip?: string
   deskripsi?: string
   gallery?: string[]
+  galleryItems?: TripGalleryItem[]
   packageCards?: TripPackageCard[]
   comparisons?: TripFeatureComparison[]
   mepoPrices?: TripMepoPrice[]
@@ -94,12 +101,19 @@ const tripPackageCardSchema = z.object({
   tag: z.string().trim().max(40).optional(),
 })
 
+export const tripGalleryItemSchema = z.object({
+  src: z.string().trim().min(1).max(500),
+  label: z.string().trim().max(120).optional().default(''),
+  tag: z.string().trim().max(60).optional().default(''),
+})
+
 export const tripDetailSchema = z.object({
   elevation: z.string().trim().max(80).optional().default(''),
   difficulty: z.string().trim().max(40).optional().default('Menengah'),
   tipeTrip: z.string().trim().max(120).optional().default(''),
   deskripsi: z.string().trim().max(3000).optional().default(''),
   gallery: z.array(z.string().trim().max(500)).max(8).optional().default([]),
+  galleryItems: z.array(tripGalleryItemSchema).max(5).optional(),
   packageCards: z.array(tripPackageCardSchema).max(10).optional().default([]),
   comparisons: z.array(tripFeatureComparisonSchema).max(40).optional().default([]),
   mepoPrices: z.array(tripMepoPriceSchema).max(30).optional().default([]),

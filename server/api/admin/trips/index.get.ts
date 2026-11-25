@@ -1,4 +1,4 @@
-import { asc, desc, eq, sql } from 'drizzle-orm'
+import { asc, desc, sql } from 'drizzle-orm'
 import { infoTrip, pesertaTrip, tripMeetingPoint, tripPaket } from '../../../database/schema'
 
 export default defineEventHandler(async () => {

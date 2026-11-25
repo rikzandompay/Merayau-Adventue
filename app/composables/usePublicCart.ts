@@ -42,6 +42,7 @@ export interface PublicAturan {
 }
 
 const STORAGE_KEY = 'merayau_public_cart_v1'
+let publicToastTimer: ReturnType<typeof setTimeout> | null = null
 
 function formatLocalIsoDate(date: Date): string {
   const y = date.getFullYear()
@@ -147,12 +148,10 @@ export function usePublicCart() {
   const toastMessage = useState<string>('mry-cart-toast', () => '')
   const hydrated = useState<boolean>('mry-cart-hydrated', () => false)
 
-  let toastTimer: ReturnType<typeof setTimeout> | null = null
-
   function flashToast(msg: string) {
     toastMessage.value = msg
-    if (toastTimer) clearTimeout(toastTimer)
-    toastTimer = setTimeout(() => {
+    if (publicToastTimer) clearTimeout(publicToastTimer)
+    publicToastTimer = setTimeout(() => {
       toastMessage.value = ''
     }, 2800)
   }

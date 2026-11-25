@@ -273,9 +273,7 @@ async function saveBundle() {
     }
     await navigateTo('/admin/item-bundle')
   } catch (err: unknown) {
-    errorMsg.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal menyimpan item bundle.'
+    errorMsg.value = extractErrorMessage(err, 'Gagal menyimpan item bundle.')
   } finally {
     saving.value = false
   }

@@ -32,6 +32,9 @@ export default defineEventHandler(async () => {
       jenisJaminan: transaksiSewa.jenisJaminan,
       tanggalKembaliRencana: transaksiSewa.tanggalKembaliRencana,
       statusSewa: transaksiSewa.statusSewa,
+      dendaTelat: transaksiSewa.dendaTelat,
+      dendaRusak: transaksiSewa.dendaRusak,
+      catatan: transaksiSewa.catatan,
       toleransiTelatJam: pengaturanSewa.toleransiTelatJam,
       dendaPersenHarian: pengaturanSewa.dendaPersenHarian,
     })
@@ -51,6 +54,9 @@ export default defineEventHandler(async () => {
     jenisJaminan: string
     tanggalKembaliRencana: Date
     statusSewa: 'Disewa' | 'Terlambat' | 'Selesai'
+    dendaTelat: number
+    dendaRusak: number
+    catatan: string | null
     toleransiTelatJam: number
     dendaPersenHarian: number
     totalUnit: number
@@ -76,6 +82,9 @@ export default defineEventHandler(async () => {
         jenisJaminan: r.jenisJaminan,
         tanggalKembaliRencana: r.tanggalKembaliRencana,
         statusSewa: r.statusSewa,
+        dendaTelat: r.dendaTelat,
+        dendaRusak: r.dendaRusak,
+        catatan: r.catatan,
         toleransiTelatJam: r.toleransiTelatJam,
         dendaPersenHarian: r.dendaPersenHarian,
         totalUnit: 0,
@@ -126,6 +135,9 @@ export default defineEventHandler(async () => {
       jenisJaminan: g.jenisJaminan,
       tanggalKembaliRencana: g.tanggalKembaliRencana,
       statusSewa: g.statusSewa,
+      dendaTelat: g.dendaTelat,
+      dendaRusak: g.dendaRusak,
+      catatan: g.catatan,
       totalUnit: g.totalUnit,
       items: g.items,
       estimasiDenda: lateInfo.dendaTelat,

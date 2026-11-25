@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
   <section
     id="ulasan"
     ref="sectionRef"
-    class="relative w-full overflow-x-clip border-t border-[#EAE5DA] bg-white py-16 sm:py-20"
+    class="mry-defer-section relative w-full overflow-x-clip border-t border-[#EAE5DA] bg-white py-16 sm:py-20"
   >
     <div class="relative z-10 flex w-full flex-col items-center">
       <!-- Word-by-word blur reveal header -->

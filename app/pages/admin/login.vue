@@ -17,10 +17,7 @@ async function handleSubmit() {
     await login(email.value.trim(), password.value)
     await navigateTo('/admin')
   } catch (err: unknown) {
-    errorMsg.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      (err as { statusMessage?: string })?.statusMessage ||
-      'Gagal masuk. Periksa kembali email dan kata sandi.'
+    errorMsg.value = extractErrorMessage(err, 'Gagal masuk. Periksa kembali email dan kata sandi.')
   } finally {
     loading.value = false
   }

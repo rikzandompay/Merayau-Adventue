@@ -40,8 +40,7 @@ export default defineEventHandler(async (event) => {
       }
 
       const prefix = body.tipePaket === 'bundle' ? 'BND' : 'PKT'
-      const kodePaket =
-        body.kodePaket?.toUpperCase() || `${prefix}-${Date.now().toString().slice(-5)}`
+      const kodePaket = body.kodePaket?.toUpperCase() || generateUniqueKode(prefix)
 
       const [res] = await tx.insert(paketAlat).values({
         kodePaket,

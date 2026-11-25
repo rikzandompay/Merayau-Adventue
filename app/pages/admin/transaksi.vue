@@ -182,25 +182,20 @@ const allRows = computed<UnifiedTxRow[]>(() => {
 
 type PeriodPreset = 'all' | 'today' | '7d' | '30d' | 'this_month' | 'last_month' | 'custom'
 
+const route = useRoute()
 const periodPreset = ref<PeriodPreset>('all')
 const periodStart = ref('')
 const periodEnd = ref('')
 const typeFilter = ref<'all' | 'rental' | 'trip'>('all')
 const statusFilter = ref('Semua')
-const search = ref('')
+const search = ref(String(route.query.kode || ''))
 
-function toLocalDateKey(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function rowDateKey(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return toLocalDateKey(d)
-}
+watch(
+  () => route.query.kode,
+  (val) => {
+    if (val) search.value = String(val)
+  },
+)
 
 watch(periodPreset, (val) => {
   if (val === 'custom' && !periodStart.value && !periodEnd.value) {
@@ -540,9 +535,7 @@ async function submitCreate() {
       showToast('Pendaftaran peserta open trip tersimpan.')
     }
   } catch (err: unknown) {
-    createErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal menyimpan transaksi baru.'
+    createErr.value = extractErrorMessage(err, 'Gagal menyimpan transaksi baru.')
   } finally {
     creating.value = false
   }
@@ -641,9 +634,7 @@ async function submitEdit() {
     editTarget.value = null
     await refreshAll()
   } catch (err: unknown) {
-    editErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal memperbarui transaksi.'
+    editErr.value = extractErrorMessage(err, 'Gagal memperbarui transaksi.')
   } finally {
     savingEdit.value = false
   }
@@ -673,44 +664,28 @@ async function confirmDelete() {
     await refreshAll()
     showToast(`Transaksi ${code} dihapus.`)
   } catch (err: unknown) {
-    deleteErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal menghapus transaksi.'
+    deleteErr.value = extractErrorMessage(err, 'Gagal menghapus transaksi.')
   } finally {
     deleting.value = false
   }
 }
 
 function exportCsv() {
-  const rows = filteredRows.value
-  if (!rows.length || !import.meta.client) return
-  const headers = ['Kode', 'Jenis', 'Tanggal', 'Pelanggan', 'WhatsApp', 'Ringkasan', 'Detail', 'Nominal', 'Status']
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
-  const csv = [
-    headers.map(esc).join(','),
-    ...rows.map((r) =>
-      [
-        r.code,
-        r.type === 'rental' ? 'Rental' : 'Trip',
-        r.dateIso,
-        r.customerName,
-        r.customerWa,
-        r.titleLine,
-        r.subLine,
-        r.amount,
-        r.status,
-      ]
-        .map(esc)
-        .join(','),
-    ),
-  ].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `merayau-transaksi-${typeFilter.value}-${periodPreset.value}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadCsv(
+    `merayau-transaksi-${typeFilter.value}-${periodPreset.value}.csv`,
+    ['Kode', 'Jenis', 'Tanggal', 'Pelanggan', 'WhatsApp', 'Ringkasan', 'Detail', 'Nominal', 'Status'],
+    filteredRows.value.map((r) => [
+      r.code,
+      r.type === 'rental' ? 'Rental' : 'Trip',
+      r.dateIso,
+      r.customerName,
+      r.customerWa,
+      r.titleLine,
+      r.subLine,
+      r.amount,
+      r.status,
+    ]),
+  )
 }
 
 function onKeyDown(e: KeyboardEvent) {
@@ -744,12 +719,8 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-        <button
-          type="button"
-          class="ed-btn-secondary flex-1 sm:flex-initial !text-xs"
-          :disabled="!filteredRows.length"
-          @click="exportCsv"
-        >
+        <button type="button" class="ed-btn-secondary flex-1 sm:flex-initial !text-xs" :disabled="!filteredRows.length"
+          @click="exportCsv">
           Export CSV
         </button>
         <button type="button" class="ed-btn-primary flex-1 sm:flex-initial !text-xs" @click="openCreateModal">
@@ -771,12 +742,9 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <button
-        type="button"
-        class="ed-card ed-card-hover cursor-pointer p-4 text-left sm:p-5"
+      <button type="button" class="ed-card ed-card-hover cursor-pointer p-4 text-left sm:p-5"
         :style="typeFilter === 'rental' ? { borderColor: 'var(--srf-accent-border)' } : {}"
-        @click="typeFilter = typeFilter === 'rental' ? 'all' : 'rental'"
-      >
+        @click="typeFilter = typeFilter === 'rental' ? 'all' : 'rental'">
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-semibold" style="color: var(--srf-ink-2)">Transaksi Rental</span>
           <StatusBadge variant="light" tone="accent" label="Rental" />
@@ -789,12 +757,9 @@ onBeforeUnmount(() => {
         </div>
       </button>
 
-      <button
-        type="button"
-        class="ed-card ed-card-hover cursor-pointer p-4 text-left sm:p-5"
+      <button type="button" class="ed-card ed-card-hover cursor-pointer p-4 text-left sm:p-5"
         :style="typeFilter === 'trip' ? { borderColor: 'var(--srf-purple-border)' } : {}"
-        @click="typeFilter = typeFilter === 'trip' ? 'all' : 'trip'"
-      >
+        @click="typeFilter = typeFilter === 'trip' ? 'all' : 'trip'">
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-semibold" style="color: var(--srf-ink-2)">Transaksi Open Trip</span>
           <StatusBadge variant="light" tone="purple" label="Trip" />
@@ -808,11 +773,8 @@ onBeforeUnmount(() => {
       </button>
     </div>
 
-    <div
-      v-if="loadError"
-      class="ed-card flex flex-wrap items-center justify-between gap-3 p-5 text-sm"
-      style="border-color: var(--srf-bad-border); color: var(--srf-bad-ink)"
-    >
+    <div v-if="loadError" class="ed-card flex flex-wrap items-center justify-between gap-3 p-5 text-sm"
+      style="border-color: var(--srf-bad-border); color: var(--srf-bad-ink)">
       <span>Gagal memuat data transaksi: {{ loadError.message }}</span>
       <button type="button" class="ed-btn-secondary !text-xs" @click="refreshAll">
         Coba Lagi
@@ -824,17 +786,12 @@ onBeforeUnmount(() => {
     </div>
 
     <section v-else class="ed-card overflow-hidden">
-      <div
-        class="flex flex-col gap-3 border-b p-4 sm:p-5"
-        style="border-color: var(--srf-line)"
-      >
+      <div class="flex flex-col gap-3 border-b p-4 sm:p-5" style="border-color: var(--srf-line)">
         <div class="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
           <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:flex lg:items-center">
-            <select
-              v-model="periodPreset"
+            <select v-model="periodPreset"
               class="ed-select col-span-2 sm:col-span-1 !min-h-[44px] lg:!min-h-[40px] lg:!w-44 !py-2 !text-xs font-medium"
-              aria-label="Periode transaksi"
-            >
+              aria-label="Periode transaksi">
               <option value="all">Semua Periode</option>
               <option value="today">Hari Ini</option>
               <option value="7d">7 Hari Terakhir</option>
@@ -844,21 +801,17 @@ onBeforeUnmount(() => {
               <option value="custom">Pilih Tanggal...</option>
             </select>
 
-            <select
-              v-model="typeFilter"
+            <select v-model="typeFilter"
               class="ed-select !min-h-[44px] lg:!min-h-[40px] lg:!w-44 !py-2 !text-xs font-medium"
-              aria-label="Filter jenis transaksi"
-            >
+              aria-label="Filter jenis transaksi">
               <option value="all">Semua Jenis ({{ typeCounts.all }})</option>
               <option value="rental">Rental Alat ({{ typeCounts.rental }})</option>
               <option value="trip">Open Trip ({{ typeCounts.trip }})</option>
             </select>
 
-            <select
-              v-model="statusFilter"
+            <select v-model="statusFilter"
               class="ed-select !min-h-[44px] lg:!min-h-[40px] lg:!w-48 !py-2 !text-xs font-medium"
-              aria-label="Filter status transaksi"
-            >
+              aria-label="Filter status transaksi">
               <option v-for="st in statusOptions" :key="st" :value="st">
                 {{ st === 'Semua' ? 'Semua Status' : st }}
               </option>
@@ -866,60 +819,34 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex items-center gap-2">
-            <input
-              v-model="search"
-              type="search"
+            <input v-model="search" type="search"
               class="ed-input !min-h-[44px] flex-1 lg:!min-h-[40px] lg:!w-60 lg:flex-initial !py-2 !text-xs"
-              placeholder="Cari kode, nama, WA, atau item..."
-            />
-            <button
-              v-if="hasActiveFilters"
-              type="button"
-              class="ed-btn-ghost shrink-0 !text-xs"
-              @click="resetFilters"
-            >
+              placeholder="Cari kode, nama, WA, atau item..." />
+            <button v-if="hasActiveFilters" type="button" class="ed-btn-ghost shrink-0 !text-xs" @click="resetFilters">
               Reset
             </button>
           </div>
         </div>
 
-        <div
-          v-if="periodPreset === 'custom'"
-          class="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap sm:items-center"
-        >
+        <div v-if="periodPreset === 'custom'" class="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap sm:items-center">
           <span class="text-xs font-medium" style="color: var(--srf-ink-3)">Periode:</span>
-          <input
-            v-model="periodStart"
-            type="date"
-            aria-label="Tanggal mulai periode"
-            class="ed-input !min-h-[44px] sm:!min-h-[38px] sm:!w-44 !py-1.5 !text-xs tabular"
-          />
+          <input v-model="periodStart" type="date" aria-label="Tanggal mulai periode"
+            class="ed-input !min-h-[44px] sm:!min-h-[38px] sm:!w-44 !py-1.5 !text-xs tabular" />
           <span class="text-xs" style="color: var(--srf-ink-3)">s/d</span>
-          <input
-            v-model="periodEnd"
-            type="date"
-            aria-label="Tanggal selesai periode"
-            class="ed-input !min-h-[44px] sm:!min-h-[38px] sm:!w-44 !py-1.5 !text-xs tabular"
-          />
+          <input v-model="periodEnd" type="date" aria-label="Tanggal selesai periode"
+            class="ed-input !min-h-[44px] sm:!min-h-[38px] sm:!w-44 !py-1.5 !text-xs tabular" />
           <span v-if="invalidCustomRange" class="text-xs font-medium" style="color: var(--srf-warn-ink)">
             Tanggal mulai melewati tanggal selesai.
           </span>
         </div>
       </div>
 
-      <div
-        v-if="!allRows.length"
-        class="px-4 py-10 text-center text-xs"
-        style="color: var(--srf-ink-3)"
-      >
+      <div v-if="!allRows.length" class="px-4 py-10 text-center text-xs" style="color: var(--srf-ink-3)">
         Belum ada transaksi rental maupun pendaftaran open trip yang tercatat.
       </div>
 
-      <div
-        v-else-if="!filteredRows.length"
-        class="space-y-3 px-4 py-10 text-center text-xs"
-        style="color: var(--srf-ink-3)"
-      >
+      <div v-else-if="!filteredRows.length" class="space-y-3 px-4 py-10 text-center text-xs"
+        style="color: var(--srf-ink-3)">
         <div>Tidak ada transaksi yang cocok dengan filter saat ini.</div>
         <button type="button" class="ed-btn-secondary !text-xs" @click="resetFilters">
           Reset Filter
@@ -928,12 +855,8 @@ onBeforeUnmount(() => {
 
       <template v-else>
         <div class="divide-y md:hidden" style="border-color: var(--srf-line)">
-          <article
-            v-for="row in filteredRows"
-            :key="`mob-${row.uid}`"
-            class="space-y-3 p-4"
-            style="border-color: var(--srf-line)"
-          >
+          <article v-for="row in filteredRows" :key="`mob-${row.uid}`" class="space-y-3 p-4"
+            style="border-color: var(--srf-line)">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="tabular text-xs font-semibold" style="color: var(--srf-ink)">
@@ -944,11 +867,8 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <div class="flex flex-wrap items-center justify-end gap-1.5">
-                <StatusBadge
-                  variant="light"
-                  :tone="row.type === 'rental' ? 'accent' : 'purple'"
-                  :label="row.type === 'rental' ? 'Rental' : 'Trip'"
-                />
+                <StatusBadge variant="light" :tone="row.type === 'rental' ? 'accent' : 'purple'"
+                  :label="row.type === 'rental' ? 'Rental' : 'Trip'" />
                 <StatusBadge variant="outline" :label="row.status" :tone="row.statusTone" />
               </div>
             </div>
@@ -979,50 +899,24 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  class="ed-btn-secondary h-11 w-11 !p-0"
-                  title="Edit transaksi"
-                  :aria-label="`Edit ${row.code}`"
-                  @click="openEditModal(row)"
-                >
+                <button type="button" class="ed-btn-secondary h-11 w-11 !p-0" title="Edit transaksi"
+                  :aria-label="`Edit ${row.code}`" @click="openEditModal(row)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </button>
-                <a
-                  :href="buildWaLink(row.customerWa, row.waText)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="ed-btn-secondary h-11 w-11 !p-0"
-                  style="color: var(--srf-good)"
-                  title="Hubungi via WhatsApp"
-                  :aria-label="`Hubungi ${row.customerName} via WhatsApp`"
-                >
+                <a :href="buildWaLink(row.customerWa, row.waText)" target="_blank" rel="noopener noreferrer"
+                  class="ed-btn-secondary h-11 w-11 !p-0" style="color: var(--srf-good)" title="Hubungi via WhatsApp"
+                  :aria-label="`Hubungi ${row.customerName} via WhatsApp`">
                   <WaIcon :size="16" />
                 </a>
-                <button
-                  type="button"
-                  class="ed-btn-secondary h-11 w-11 !p-0"
-                  style="color: var(--srf-bad-ink)"
-                  title="Hapus transaksi"
-                  :aria-label="`Hapus ${row.code}`"
-                  @click="openDeleteModal(row)"
-                >
+                <button type="button" class="ed-btn-secondary h-11 w-11 !p-0" style="color: var(--srf-bad-ink)"
+                  title="Hapus transaksi" :aria-label="`Hapus ${row.code}`" @click="openDeleteModal(row)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V7"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
+                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </button>
               </div>
@@ -1054,11 +948,8 @@ onBeforeUnmount(() => {
                   </div>
                 </td>
                 <td class="px-4 py-3">
-                  <StatusBadge
-                    variant="light"
-                    :tone="row.type === 'rental' ? 'accent' : 'purple'"
-                    :label="row.type === 'rental' ? 'Rental' : 'Trip'"
-                  />
+                  <StatusBadge variant="light" :tone="row.type === 'rental' ? 'accent' : 'purple'"
+                    :label="row.type === 'rental' ? 'Rental' : 'Trip'" />
                 </td>
                 <td class="px-4 py-3">
                   <div class="text-xs font-semibold" style="color: var(--srf-ink)">
@@ -1089,50 +980,25 @@ onBeforeUnmount(() => {
                 </td>
                 <td class="px-4 py-3 text-right">
                   <div class="inline-flex items-center gap-1.5 whitespace-nowrap">
-                    <button
-                      type="button"
-                      class="ed-btn-secondary h-9 w-9 min-h-0 !p-0"
-                      title="Edit transaksi"
-                      :aria-label="`Edit ${row.code}`"
-                      @click="openEditModal(row)"
-                    >
+                    <button type="button" class="ed-btn-secondary h-9 w-9 min-h-0 !p-0" title="Edit transaksi"
+                      :aria-label="`Edit ${row.code}`" @click="openEditModal(row)">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path
-                          d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z" stroke="currentColor"
+                          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </button>
-                    <a
-                      :href="buildWaLink(row.customerWa, row.waText)"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="ed-btn-secondary !h-9 !w-9 !min-h-0 !p-0 !rounded-[8px]"
-                      style="color: var(--srf-good)"
-                      title="Hubungi via WhatsApp"
-                      :aria-label="`Hubungi ${row.customerName} via WhatsApp`"
-                    >
+                    <a :href="buildWaLink(row.customerWa, row.waText)" target="_blank" rel="noopener noreferrer"
+                      class="ed-btn-secondary !h-9 !w-9 !min-h-0 !p-0 !rounded-[8px]" style="color: var(--srf-good)"
+                      title="Hubungi via WhatsApp" :aria-label="`Hubungi ${row.customerName} via WhatsApp`">
                       <WaIcon :size="16" />
                     </a>
-                    <button
-                      type="button"
-                      class="ed-btn-secondary h-9 w-9 min-h-0 !p-0"
-                      style="color: var(--srf-bad-ink)"
-                      title="Hapus transaksi"
-                      :aria-label="`Hapus ${row.code}`"
-                      @click="openDeleteModal(row)"
-                    >
+                    <button type="button" class="ed-btn-secondary h-9 w-9 min-h-0 !p-0"
+                      style="color: var(--srf-bad-ink)" title="Hapus transaksi" :aria-label="`Hapus ${row.code}`"
+                      @click="openDeleteModal(row)">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path
                           d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V7"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
+                          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </button>
                   </div>
@@ -1144,60 +1010,36 @@ onBeforeUnmount(() => {
       </template>
     </section>
 
-    <div
-      v-if="showCreateModal"
+    <div v-if="showCreateModal"
       class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/55 p-4"
-      @click.self="showCreateModal = false"
-    >
-      <div
-        class="ed-card my-4 w-full max-w-2xl overflow-hidden shadow-xl sm:my-6"
-        style="border-color: var(--srf-line-strong)"
-      >
-        <div
-          class="flex items-center justify-between border-b px-5 py-3.5"
-          style="background-color: var(--srf-well); border-color: var(--srf-line)"
-        >
+      @click.self="showCreateModal = false">
+      <div class="ed-card my-4 w-full max-w-2xl overflow-hidden shadow-xl sm:my-6"
+        style="border-color: var(--srf-line-strong)">
+        <div class="flex items-center justify-between border-b px-5 py-3.5"
+          style="background-color: var(--srf-well); border-color: var(--srf-line)">
           <div>
             <p class="ed-label">TRANSAKSI BARU</p>
             <h2 class="text-lg font-bold">Tambah Transaksi</h2>
           </div>
-          <button
-            type="button"
-            class="ed-btn-ghost !px-2.5 !py-1 text-xs font-bold"
-            aria-label="Tutup modal"
-            @click="showCreateModal = false"
-          >
+          <button type="button" class="ed-btn-ghost !px-2.5 !py-1 text-xs font-bold" aria-label="Tutup modal"
+            @click="showCreateModal = false">
             X
           </button>
         </div>
 
         <div class="border-b px-5 py-3" style="border-color: var(--srf-line)">
-          <div
-            class="inline-flex rounded-[10px] border p-0.5 text-xs"
-            style="background-color: var(--srf-well); border-color: var(--srf-line)"
-          >
-            <button
-              type="button"
-              class="min-h-[38px] cursor-pointer rounded-[8px] px-4 py-1.5 font-semibold"
-              :style="
-                createKind === 'rental'
-                  ? { backgroundColor: 'var(--srf-surface)', color: 'var(--srf-accent-ink)' }
-                  : { color: 'var(--srf-ink-2)' }
-              "
-              @click="createKind = 'rental'"
-            >
+          <div class="inline-flex rounded-[10px] border p-0.5 text-xs"
+            style="background-color: var(--srf-well); border-color: var(--srf-line)">
+            <button type="button" class="min-h-[38px] cursor-pointer rounded-[8px] px-4 py-1.5 font-semibold" :style="createKind === 'rental'
+                ? { backgroundColor: 'var(--srf-surface)', color: 'var(--srf-accent-ink)' }
+                : { color: 'var(--srf-ink-2)' }
+              " @click="createKind = 'rental'">
               Rental Alat
             </button>
-            <button
-              type="button"
-              class="min-h-[38px] cursor-pointer rounded-[8px] px-4 py-1.5 font-semibold"
-              :style="
-                createKind === 'trip'
-                  ? { backgroundColor: 'var(--srf-surface)', color: 'var(--srf-purple-ink)' }
-                  : { color: 'var(--srf-ink-2)' }
-              "
-              @click="createKind = 'trip'"
-            >
+            <button type="button" class="min-h-[38px] cursor-pointer rounded-[8px] px-4 py-1.5 font-semibold" :style="createKind === 'trip'
+                ? { backgroundColor: 'var(--srf-surface)', color: 'var(--srf-purple-ink)' }
+                : { color: 'var(--srf-ink-2)' }
+              " @click="createKind = 'trip'">
               Open Trip
             </button>
           </div>
@@ -1207,11 +1049,8 @@ onBeforeUnmount(() => {
           <template v-if="createKind === 'rental'">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="ed-label">DATA PENYEWA &amp; JADWAL SEWA</span>
-              <select
-                v-if="penyewaOptions.length"
-                v-model="quickPickPenyewaId"
-                class="ed-select !w-auto !py-1.5 !text-xs"
-              >
+              <select v-if="penyewaOptions.length" v-model="quickPickPenyewaId"
+                class="ed-select !w-auto !py-1.5 !text-xs">
                 <option :value="0">Isi dari penyewa lama...</option>
                 <option v-for="p in penyewaOptions" :key="p.id" :value="p.id">
                   {{ p.nama }} · {{ p.noWa }}
@@ -1222,11 +1061,13 @@ onBeforeUnmount(() => {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div class="space-y-1">
                 <label class="ed-label">NAMA PENYEWA</label>
-                <input v-model="createRentalForm.nama" type="text" class="ed-input !text-xs" placeholder="Nama lengkap" />
+                <input v-model="createRentalForm.nama" type="text" class="ed-input !text-xs"
+                  placeholder="Nama lengkap" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">NO. WHATSAPP</label>
-                <input v-model="createRentalForm.noWa" type="text" class="ed-input tabular !text-xs" placeholder="0812xxxxxxxx" />
+                <input v-model="createRentalForm.noWa" type="text" class="ed-input tabular !text-xs"
+                  placeholder="0812xxxxxxxx" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">JAMINAN FISIK</label>
@@ -1238,15 +1079,18 @@ onBeforeUnmount(() => {
               </div>
               <div class="space-y-1">
                 <label class="ed-label">ALAMAT</label>
-                <input v-model="createRentalForm.alamat" type="text" class="ed-input !text-xs" placeholder="Alamat domisili" />
+                <input v-model="createRentalForm.alamat" type="text" class="ed-input !text-xs"
+                  placeholder="Alamat domisili" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">TANGGAL PINJAM</label>
-                <input v-model="createRentalForm.tanggalPinjam" type="datetime-local" class="ed-input tabular !text-xs" />
+                <input v-model="createRentalForm.tanggalPinjam" type="datetime-local"
+                  class="ed-input tabular !text-xs" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">RENCANA KEMBALI</label>
-                <input v-model="createRentalForm.tanggalKembaliRencana" type="datetime-local" class="ed-input tabular !text-xs" />
+                <input v-model="createRentalForm.tanggalKembaliRencana" type="datetime-local"
+                  class="ed-input tabular !text-xs" />
               </div>
             </div>
 
@@ -1254,20 +1098,12 @@ onBeforeUnmount(() => {
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <span class="ed-label">ALAT &amp; PAKET DISEWA</span>
                 <div class="flex gap-2">
-                  <button
-                    type="button"
-                    class="ed-btn-secondary !min-h-[34px] !px-3 !py-1 !text-[11px]"
-                    :disabled="!paketOptions.length"
-                    @click="addCreatePaketLine"
-                  >
+                  <button type="button" class="ed-btn-secondary !min-h-[34px] !px-3 !py-1 !text-[11px]"
+                    :disabled="!paketOptions.length" @click="addCreatePaketLine">
                     + Paket
                   </button>
-                  <button
-                    type="button"
-                    class="ed-btn-secondary !min-h-[34px] !px-3 !py-1 !text-[11px]"
-                    :disabled="!alatOptions.length"
-                    @click="addCreateAlatLine"
-                  >
+                  <button type="button" class="ed-btn-secondary !min-h-[34px] !px-3 !py-1 !text-[11px]"
+                    :disabled="!alatOptions.length" @click="addCreateAlatLine">
                     + Alat Satuan
                   </button>
                 </div>
@@ -1277,44 +1113,30 @@ onBeforeUnmount(() => {
                 Memuat daftar alat dan paket...
               </div>
 
-              <div
-                v-for="(pl, idx) in createRentalForm.paketLines"
-                :key="`cp-${idx}`"
-                class="flex items-center gap-2"
-              >
+              <div v-for="(pl, idx) in createRentalForm.paketLines" :key="`cp-${idx}`" class="flex items-center gap-2">
                 <select v-model.number="pl.idPaket" class="ed-select flex-1 !text-xs">
                   <option v-for="pkg in paketOptions" :key="pkg.id" :value="pkg.id">
-                    {{ pkg.tipePaket === 'bundle' ? '[Bundle]' : '[Paket]' }} {{ pkg.namaPaket }} · {{ formatRupiah(pkg.hargaEfektif ?? pkg.tarifPaket) }}/24j
+                    {{ pkg.tipePaket === 'bundle' ? '[Bundle]' : '[Paket]' }} {{ pkg.namaPaket }} · {{
+                      formatRupiah(pkg.hargaEfektif ?? pkg.tarifPaket) }}/24j
                   </option>
                 </select>
                 <input v-model.number="pl.qtyPaket" type="number" min="1" class="ed-input tabular !w-20 !text-xs" />
-                <button
-                  type="button"
-                  class="cursor-pointer px-2 font-semibold"
-                  style="color: var(--srf-bad-ink)"
-                  @click="createRentalForm.paketLines.splice(idx, 1)"
-                >
+                <button type="button" class="cursor-pointer px-2 font-semibold" style="color: var(--srf-bad-ink)"
+                  @click="createRentalForm.paketLines.splice(idx, 1)">
                   Hapus
                 </button>
               </div>
 
-              <div
-                v-for="(line, idx) in createRentalForm.itemLines"
-                :key="`ci-${idx}`"
-                class="flex items-center gap-2"
-              >
+              <div v-for="(line, idx) in createRentalForm.itemLines" :key="`ci-${idx}`" class="flex items-center gap-2">
                 <select v-model.number="line.idAlat" class="ed-select flex-1 !text-xs">
                   <option v-for="a in alatOptions" :key="a.id" :value="a.id">
-                    {{ a.namaAlat }} · {{ formatRupiah(a.hargaEfektif ?? a.hargaHarian) }}/24j (Stok {{ a.stokTersedia }})
+                    {{ a.namaAlat }} · {{ formatRupiah(a.hargaEfektif ?? a.hargaHarian) }}/24j (Stok {{ a.stokTersedia
+                    }})
                   </option>
                 </select>
                 <input v-model.number="line.jumlah" type="number" min="1" class="ed-input tabular !w-20 !text-xs" />
-                <button
-                  type="button"
-                  class="cursor-pointer px-2 font-semibold"
-                  style="color: var(--srf-bad-ink)"
-                  @click="createRentalForm.itemLines.splice(idx, 1)"
-                >
+                <button type="button" class="cursor-pointer px-2 font-semibold" style="color: var(--srf-bad-ink)"
+                  @click="createRentalForm.itemLines.splice(idx, 1)">
                   Hapus
                 </button>
               </div>
@@ -1352,7 +1174,8 @@ onBeforeUnmount(() => {
 
             <div v-if="selectedCreateMepo?.isCustom" class="space-y-1">
               <label class="ed-label">LOKASI MEPO CUSTOM</label>
-              <input v-model="createTripForm.mepoCustom" type="text" class="ed-input !text-xs" placeholder="Tulis lokasi titik kumpul..." />
+              <input v-model="createTripForm.mepoCustom" type="text" class="ed-input !text-xs"
+                placeholder="Tulis lokasi titik kumpul..." />
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1370,7 +1193,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="space-y-1">
                 <label class="ed-label">KONTAK DARURAT</label>
-                <input v-model="createTripForm.kontakDarurat" type="text" class="ed-input !text-xs" placeholder="Mis. Ibu (0812xxx)" />
+                <input v-model="createTripForm.kontakDarurat" type="text" class="ed-input !text-xs"
+                  placeholder="Mis. Ibu (0812xxx)" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">STATUS BAYAR</label>
@@ -1382,33 +1206,29 @@ onBeforeUnmount(() => {
               </div>
               <div class="space-y-1">
                 <label class="ed-label">NOMINAL BAYAR</label>
-                <input v-model.number="createTripForm.nominalBayar" type="number" min="0" class="ed-input tabular !text-xs" />
+                <input v-model.number="createTripForm.nominalBayar" type="number" min="0"
+                  class="ed-input tabular !text-xs" />
               </div>
             </div>
 
             <div class="space-y-1">
               <label class="ed-label">SEWA ALAT TAMBAHAN (OPSIONAL)</label>
-              <input v-model="createTripForm.sewaAlatTambahan" type="text" class="ed-input !text-xs" placeholder="Mis. Headlamp, Trekking Pole" />
+              <input v-model="createTripForm.sewaAlatTambahan" type="text" class="ed-input !text-xs"
+                placeholder="Mis. Headlamp, Trekking Pole" />
             </div>
           </template>
 
-          <div
-            v-if="createErr"
-            class="rounded-[10px] border px-3.5 py-2.5 text-xs font-medium"
-            style="
+          <div v-if="createErr" class="rounded-[10px] border px-3.5 py-2.5 text-xs font-medium" style="
               background-color: var(--srf-bad-soft);
               border-color: var(--srf-bad-border);
               color: var(--srf-bad-ink);
-            "
-          >
+            ">
             {{ createErr }}
           </div>
         </div>
 
-        <div
-          class="flex justify-end gap-2.5 border-t px-5 py-3.5"
-          style="background-color: var(--srf-well); border-color: var(--srf-line)"
-        >
+        <div class="flex justify-end gap-2.5 border-t px-5 py-3.5"
+          style="background-color: var(--srf-well); border-color: var(--srf-line)">
           <button type="button" class="ed-btn-secondary !text-xs" @click="showCreateModal = false">
             Batal
           </button>
@@ -1419,31 +1239,20 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div
-      v-if="editTarget"
-      class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/55 p-4"
-      @click.self="editTarget = null"
-    >
-      <div
-        class="ed-card my-4 w-full max-w-lg overflow-hidden shadow-xl sm:my-6"
-        style="border-color: var(--srf-line-strong)"
-      >
-        <div
-          class="flex items-center justify-between border-b px-5 py-3.5"
-          style="background-color: var(--srf-well); border-color: var(--srf-line)"
-        >
+    <div v-if="editTarget" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/55 p-4"
+      @click.self="editTarget = null">
+      <div class="ed-card my-4 w-full max-w-lg overflow-hidden shadow-xl sm:my-6"
+        style="border-color: var(--srf-line-strong)">
+        <div class="flex items-center justify-between border-b px-5 py-3.5"
+          style="background-color: var(--srf-well); border-color: var(--srf-line)">
           <div>
             <p class="ed-label">
               EDIT {{ editTarget.type === 'rental' ? 'TRANSAKSI RENTAL' : 'PESERTA TRIP' }} · {{ editTarget.code }}
             </p>
             <h2 class="text-lg font-bold">{{ editTarget.customerName }}</h2>
           </div>
-          <button
-            type="button"
-            class="ed-btn-ghost !px-2.5 !py-1 text-xs font-bold"
-            aria-label="Tutup modal edit"
-            @click="editTarget = null"
-          >
+          <button type="button" class="ed-btn-ghost !px-2.5 !py-1 text-xs font-bold" aria-label="Tutup modal edit"
+            @click="editTarget = null">
             X
           </button>
         </div>
@@ -1453,12 +1262,9 @@ onBeforeUnmount(() => {
             <div class="ed-well space-y-1.5 p-3">
               <div class="ed-label">ITEM DISEWA ({{ editTarget.rentalRaw.items.length }})</div>
               <div class="flex flex-wrap gap-1.5">
-                <span
-                  v-for="(it, idx) in editTarget.rentalRaw.items"
-                  :key="idx"
+                <span v-for="(it, idx) in editTarget.rentalRaw.items" :key="idx"
                   class="rounded-md border px-2.5 py-0.5 text-[11px] font-medium"
-                  style="background-color: var(--srf-surface); border-color: var(--srf-line)"
-                >
+                  style="background-color: var(--srf-surface); border-color: var(--srf-line)">
                   {{ it.namaAlat }} x{{ it.jumlah }}
                 </span>
               </div>
@@ -1483,15 +1289,18 @@ onBeforeUnmount(() => {
               </div>
               <div class="space-y-1 sm:col-span-2">
                 <label class="ed-label">RENCANA KEMBALI</label>
-                <input v-model="editRentalForm.tanggalKembaliRencana" type="datetime-local" class="ed-input tabular !text-xs" />
+                <input v-model="editRentalForm.tanggalKembaliRencana" type="datetime-local"
+                  class="ed-input tabular !text-xs" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">DENDA TELAT (RP)</label>
-                <input v-model.number="editRentalForm.dendaTelat" type="number" min="0" class="ed-input tabular !text-xs" />
+                <input v-model.number="editRentalForm.dendaTelat" type="number" min="0"
+                  class="ed-input tabular !text-xs" />
               </div>
               <div class="space-y-1">
                 <label class="ed-label">DENDA RUSAK (RP)</label>
-                <input v-model.number="editRentalForm.dendaRusak" type="number" min="0" class="ed-input tabular !text-xs" />
+                <input v-model.number="editRentalForm.dendaRusak" type="number" min="0"
+                  class="ed-input tabular !text-xs" />
               </div>
             </div>
           </template>
@@ -1540,7 +1349,8 @@ onBeforeUnmount(() => {
               </div>
               <div class="space-y-1">
                 <label class="ed-label">NOMINAL BAYAR (RP)</label>
-                <input v-model.number="editTripForm.nominalBayar" type="number" min="0" class="ed-input tabular !text-xs" />
+                <input v-model.number="editTripForm.nominalBayar" type="number" min="0"
+                  class="ed-input tabular !text-xs" />
               </div>
               <div class="space-y-1 sm:col-span-2">
                 <label class="ed-label">SEWA ALAT TAMBAHAN</label>
@@ -1549,23 +1359,17 @@ onBeforeUnmount(() => {
             </div>
           </template>
 
-          <div
-            v-if="editErr"
-            class="rounded-[10px] border px-3.5 py-2.5 text-xs font-medium"
-            style="
+          <div v-if="editErr" class="rounded-[10px] border px-3.5 py-2.5 text-xs font-medium" style="
               background-color: var(--srf-bad-soft);
               border-color: var(--srf-bad-border);
               color: var(--srf-bad-ink);
-            "
-          >
+            ">
             {{ editErr }}
           </div>
         </div>
 
-        <div
-          class="flex justify-end gap-2.5 border-t px-5 py-3.5"
-          style="background-color: var(--srf-well); border-color: var(--srf-line)"
-        >
+        <div class="flex justify-end gap-2.5 border-t px-5 py-3.5"
+          style="background-color: var(--srf-well); border-color: var(--srf-line)">
           <button type="button" class="ed-btn-secondary !text-xs" @click="editTarget = null">
             Batal
           </button>
@@ -1576,59 +1380,43 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <div
-      v-if="deleteTarget"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
-      @click.self="deleteTarget = null"
-    >
-      <div
-        class="ed-card w-full max-w-sm space-y-4 p-5 text-center shadow-xl"
-        style="border-color: var(--srf-line-strong)"
-      >
+    <div v-if="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+      @click.self="deleteTarget = null">
+      <div class="ed-card w-full max-w-sm space-y-4 p-5 text-center shadow-xl"
+        style="border-color: var(--srf-line-strong)">
         <div>
           <p class="ed-label" style="color: var(--srf-bad-ink)">KONFIRMASI HAPUS</p>
           <h3 class="mt-1 text-lg font-bold">{{ deleteTarget.code }} · {{ deleteTarget.customerName }}</h3>
           <p class="mt-1 text-xs" style="color: var(--srf-ink-2)">
-            Yakin ingin menghapus transaksi {{ deleteTarget.type === 'rental' ? 'rental alat' : 'peserta open trip' }} ini?
+            Yakin ingin menghapus transaksi {{ deleteTarget.type === 'rental' ? 'rental alat' : 'peserta open trip' }}
+            ini?
           </p>
         </div>
-        <div
-          v-if="deleteErr"
-          class="rounded-[10px] border px-3 py-2 text-xs font-medium"
-          style="
+        <div v-if="deleteErr" class="rounded-[10px] border px-3 py-2 text-xs font-medium" style="
             background-color: var(--srf-bad-soft);
             border-color: var(--srf-bad-border);
             color: var(--srf-bad-ink);
-          "
-        >
+          ">
           {{ deleteErr }}
         </div>
         <div class="flex justify-center gap-2.5">
           <button type="button" class="ed-btn-secondary !text-xs" @click="deleteTarget = null">
             Batal
           </button>
-          <button
-            type="button"
-            class="ed-btn-primary !text-xs"
-            style="background-color: var(--srf-bad)"
-            :disabled="deleting"
-            @click="confirmDelete"
-          >
+          <button type="button" class="ed-btn-primary !text-xs" style="background-color: var(--srf-bad)"
+            :disabled="deleting" @click="confirmDelete">
             {{ deleting ? 'Menghapus...' : 'Ya, Hapus' }}
           </button>
         </div>
       </div>
     </div>
 
-    <div
-      v-if="toastMsg"
-      class="fixed bottom-5 right-5 z-50 rounded-[10px] border px-4 py-2 text-xs font-semibold shadow-lg"
-      style="
+    <div v-if="toastMsg"
+      class="fixed bottom-5 right-5 z-50 rounded-[10px] border px-4 py-2 text-xs font-semibold shadow-lg" style="
         background-color: var(--srf-ink);
         border-color: var(--srf-line-strong);
         color: var(--srf-bg);
-      "
-    >
+      ">
       {{ toastMsg }}
     </div>
   </div>

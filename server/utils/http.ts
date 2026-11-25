@@ -1,5 +1,12 @@
+import { randomBytes } from 'node:crypto'
 import type { H3Event } from 'h3'
 import type { z } from 'zod'
+
+export function generateUniqueKode(prefix: string): string {
+  const ts = Date.now().toString(36).slice(-5).toUpperCase()
+  const rand = randomBytes(4).toString('hex').toUpperCase()
+  return `${prefix}-${ts}${rand}`
+}
 
 export async function parseValidatedBody<T extends z.ZodTypeAny>(
   event: H3Event,

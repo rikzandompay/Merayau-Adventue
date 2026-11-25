@@ -89,8 +89,7 @@ async function saveRule() {
     await refreshSetting()
     showToast('Aturan promo durasi & denda berhasil diperbarui.')
   } catch (err: unknown) {
-    const e = err as { data?: { statusMessage?: string } }
-    showToast(e?.data?.statusMessage || 'Gagal menyimpan pengaturan promo durasi.', 'bad')
+    showToast(extractErrorMessage(err, 'Gagal menyimpan pengaturan promo durasi.'), 'bad')
   } finally {
     savingRule.value = false
   }
@@ -225,8 +224,7 @@ async function submitPromo() {
     showModal.value = false
     await refreshPromos()
   } catch (err: unknown) {
-    formErr.value =
-      (err as { data?: { statusMessage?: string } })?.data?.statusMessage || 'Gagal menyimpan promo diskon.'
+    formErr.value = extractErrorMessage(err, 'Gagal menyimpan promo diskon.')
   } finally {
     savingPromo.value = false
   }
@@ -242,8 +240,7 @@ async function togglePromoStatus(p: PromoRow) {
     await refreshPromos()
     showToast(!p.statusAktif ? 'Promo diaktifkan.' : 'Promo dinonaktifkan.')
   } catch (err: unknown) {
-    const e = err as { data?: { statusMessage?: string } }
-    showToast(e?.data?.statusMessage || 'Gagal mengubah status promo.', 'bad')
+    showToast(extractErrorMessage(err, 'Gagal mengubah status promo.'), 'bad')
   } finally {
     togglingId.value = null
   }
@@ -258,8 +255,7 @@ async function confirmDeletePromo() {
     deleteTarget.value = null
     await refreshPromos()
   } catch (err: unknown) {
-    const e = err as { data?: { statusMessage?: string } }
-    showToast(e?.data?.statusMessage || 'Gagal menghapus promo.', 'bad')
+    showToast(extractErrorMessage(err, 'Gagal menghapus promo.'), 'bad')
   } finally {
     deletingId.value = null
   }

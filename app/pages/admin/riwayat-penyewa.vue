@@ -46,19 +46,6 @@ const periodEnd = ref('')
 const ketepatanFilter = ref<'Semua' | 'Tepat Waktu' | 'Terlambat'>('Semua')
 const search = ref('')
 
-function toLocalDateKey(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function rowDateKey(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return toLocalDateKey(d)
-}
-
 watch(periodPreset, (val) => {
   if (val === 'custom' && !periodStart.value && !periodEnd.value) {
     const now = new Date()
@@ -200,70 +187,54 @@ async function confirmDelete() {
     await refresh()
     showToast(`Riwayat ${target.kodeSewa} (${target.namaPenyewa}) berhasil dihapus.`)
   } catch (err: unknown) {
-    const e = err as { data?: { statusMessage?: string } }
-    showToast(e?.data?.statusMessage || 'Gagal menghapus data riwayat.', 'bad')
+    showToast(extractErrorMessage(err, 'Gagal menghapus data riwayat.'), 'bad')
   } finally {
     deletingId.value = null
   }
 }
 
 function exportCsv() {
-  const rows = filteredRows.value
-  if (!rows.length || !import.meta.client) return
-  const headers = [
-    'Kode Sewa',
-    'Nama Penyewa',
-    'NIK / SIM',
-    'WhatsApp',
-    'Jaminan',
-    'Tanggal Pinjam',
-    'Rencana Kembali',
-    'Aktual Kembali',
-    'Durasi (Hari)',
-    'Ringkasan Alat',
-    'Total Unit',
-    'Biaya Sewa',
-    'Denda Telat',
-    'Denda Rusak',
-    'Total Akhir',
-    'Kondisi Kembali',
-    'Ketepatan',
-  ]
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
-  const csv = [
-    headers.map(esc).join(','),
-    ...rows.map((r) =>
-      [
-        r.kodeSewa,
-        r.namaPenyewa,
-        r.noIdentitas,
-        r.noWa,
-        r.jenisJaminan,
-        r.tanggalPinjam,
-        r.tanggalKembaliRencana,
-        r.tanggalKembaliAktual,
-        r.durasiHari,
-        r.ringkasanAlat,
-        r.totalUnit,
-        r.totalBiayaSewa,
-        r.dendaTelat,
-        r.dendaRusak,
-        r.totalAkhir,
-        r.kondisiKembali,
-        r.statusKetepatan,
-      ]
-        .map(esc)
-        .join(','),
-    ),
-  ].join('\n')
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `merayau-riwayat-penyewa-${periodPreset.value}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadCsv(
+    `merayau-riwayat-penyewa-${periodPreset.value}.csv`,
+    [
+      'Kode Sewa',
+      'Nama Penyewa',
+      'NIK / SIM',
+      'WhatsApp',
+      'Jaminan',
+      'Tanggal Pinjam',
+      'Rencana Kembali',
+      'Aktual Kembali',
+      'Durasi (Hari)',
+      'Ringkasan Alat',
+      'Total Unit',
+      'Biaya Sewa',
+      'Denda Telat',
+      'Denda Rusak',
+      'Total Akhir',
+      'Kondisi Kembali',
+      'Ketepatan',
+    ],
+    filteredRows.value.map((r) => [
+      r.kodeSewa,
+      r.namaPenyewa,
+      r.noIdentitas,
+      r.noWa,
+      r.jenisJaminan,
+      r.tanggalPinjam,
+      r.tanggalKembaliRencana,
+      r.tanggalKembaliAktual,
+      r.durasiHari,
+      r.ringkasanAlat,
+      r.totalUnit,
+      r.totalBiayaSewa,
+      r.dendaTelat,
+      r.dendaRusak,
+      r.totalAkhir,
+      r.kondisiKembali,
+      r.statusKetepatan,
+    ]),
+  )
 }
 
 function onKeyDown(e: KeyboardEvent) {

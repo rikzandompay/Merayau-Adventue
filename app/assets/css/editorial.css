@@ -490,17 +490,19 @@ html:has(.mry-public) {
   [data-reveal-media]:not([data-reveal-media='settled']),
   [data-reveal-clip]:not([data-reveal-clip='settled'])
 ) {
-  transition-property: opacity, transform, filter, clip-path;
+  transition-property: opacity, transform;
   transition-duration: var(--reveal-duration, 780ms);
   transition-timing-function: var(--reveal-ease, cubic-bezier(0.16, 1, 0.3, 1));
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform, filter, clip-path;
+}
+
+.mry-public.mry-motion-ready [data-reveal-clip]:not([data-reveal-clip='settled']) {
+  transition-property: opacity, transform, clip-path;
 }
 
 .mry-public.mry-motion-ready [data-reveal]:not([data-reveal='visible']):not([data-reveal='settled']) {
   opacity: 0;
   transform: translate3d(0, 56px, 0) scale(0.97);
-  filter: blur(6px);
 }
 
 /* Direction variants: slide from left */
@@ -508,7 +510,6 @@ html:has(.mry-public) {
   --reveal-duration: 840ms;
   opacity: 0;
   transform: translate3d(-72px, 0, 0) rotate(-1.4deg);
-  filter: blur(5px);
 }
 
 /* Direction variants: slide from right */
@@ -516,7 +517,6 @@ html:has(.mry-public) {
   --reveal-duration: 840ms;
   opacity: 0;
   transform: translate3d(72px, 0, 0) rotate(1.4deg);
-  filter: blur(5px);
 }
 
 /* Scale-up tactile entrance */
@@ -525,7 +525,6 @@ html:has(.mry-public) {
   --reveal-ease: cubic-bezier(0.34, 1.35, 0.64, 1);
   opacity: 0;
   transform: translate3d(0, 36px, 0) scale(0.84);
-  filter: blur(4px);
 }
 
 /* Media showcase reveal */
@@ -533,14 +532,13 @@ html:has(.mry-public) {
   --reveal-duration: 880ms;
   opacity: 0;
   transform: translate3d(0, 64px, 0) scale(0.92);
-  filter: blur(8px);
 }
 
 /* Editorial clip-path photo curtain wipe */
 .mry-public.mry-motion-ready [data-reveal-clip]:not([data-reveal-clip='visible']):not([data-reveal-clip='settled']) {
-  --reveal-duration: 950ms;
+  --reveal-duration: 720ms;
   opacity: 0;
-  transform: translate3d(0, 32px, 0) scale(1.1);
+  transform: translate3d(0, 24px, 0) scale(1.06);
   clip-path: inset(100% 0 0 0 round 18px);
 }
 
@@ -551,7 +549,6 @@ html:has(.mry-public) {
 .mry-public.mry-motion-ready [data-reveal-media='visible'] {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-  filter: blur(0);
 }
 
 .mry-public.mry-motion-ready [data-reveal-clip='visible'] {
@@ -562,33 +559,29 @@ html:has(.mry-public) {
 
 /* Parent-triggered staggered children (safe for horizontal carousels & grids) */
 .mry-public.mry-motion-ready :is([data-reveal-stagger]:not([data-reveal-stagger='settled']), [data-reveal-stagger='visible']) .mry-stagger-item {
-  transition-property: opacity, transform, filter;
+  transition-property: opacity, transform;
   transition-duration: 720ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--stagger-delay, 0ms);
-  will-change: opacity, transform, filter;
 }
 
 .mry-public.mry-motion-ready [data-reveal-stagger]:not([data-reveal-stagger='visible']):not([data-reveal-stagger='settled']) .mry-stagger-item {
   opacity: 0;
   transform: translate3d(0, 42px, 0) scale(0.94);
-  filter: blur(5px);
 }
 
 .mry-public.mry-motion-ready [data-reveal-stagger='visible'] .mry-stagger-item {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
-  filter: blur(0);
 }
 
 .mry-public.mry-motion-ready [data-reveal-carousel]:not([data-reveal-carousel='visible']):not([data-reveal-carousel='settled']) .mry-carousel-card {
   opacity: 0;
   transform: translate3d(84px, 28px, 0) scale(0.9) rotate(2deg);
-  filter: blur(5px);
 }
 
 .mry-public.mry-motion-ready :is([data-reveal-carousel]:not([data-reveal-carousel='settled']), [data-reveal-carousel='visible']) .mry-carousel-card {
-  transition-property: opacity, transform, filter;
+  transition-property: opacity, transform;
   transition-duration: 780ms;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--stagger-delay, 0ms);
@@ -597,7 +590,12 @@ html:has(.mry-public) {
 .mry-public.mry-motion-ready [data-reveal-carousel='visible'] .mry-carousel-card {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
-  filter: blur(0);
+}
+
+/* Skip off-screen paint & marquee compositing for lower landing sections */
+.mry-defer-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 650px;
 }
 
 /* FanGallery active caption switch */
@@ -618,44 +616,6 @@ html:has(.mry-public) {
 .mry-fan-caption-leave-to {
   opacity: 0;
   transform: translateY(-4px);
-}
-
-/* Toast / Rule card list transition */
-.mry-toast-list-enter-active,
-.mry-toast-list-leave-active,
-.mry-toast-list-move {
-  transition:
-    opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.mry-toast-list-enter-from,
-.mry-toast-list-leave-to {
-  opacity: 0;
-  transform: translateY(8px) scale(0.98);
-}
-.mry-toast-list-leave-active {
-  position: relative;
-}
-
-/* TripDetailModal transition */
-.mry-modal-enter-active,
-.mry-modal-leave-active {
-  transition: opacity 220ms ease;
-}
-.mry-modal-enter-active .mry-modal-panel,
-.mry-modal-leave-active .mry-modal-panel {
-  transition:
-    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.mry-modal-enter-from,
-.mry-modal-leave-to {
-  opacity: 0;
-}
-.mry-modal-enter-from .mry-modal-panel,
-.mry-modal-leave-to .mry-modal-panel {
-  opacity: 0;
-  transform: translateY(10px) scale(0.96);
 }
 
 /* RentalCartDrawer slide-over transition */

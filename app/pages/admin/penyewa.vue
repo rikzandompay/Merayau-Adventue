@@ -81,9 +81,7 @@ async function saveCustomer() {
   } catch (err: unknown) {
     feedback.value = {
       type: 'err',
-      msg:
-        (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data
-          ?.statusMessage || 'Gagal menyimpan data penyewa.',
+      msg: extractErrorMessage(err, 'Gagal menyimpan data penyewa.'),
     }
   } finally {
     saving.value = false

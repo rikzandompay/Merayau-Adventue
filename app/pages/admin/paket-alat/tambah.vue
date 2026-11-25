@@ -244,9 +244,7 @@ async function savePaket() {
     }
     await navigateTo('/admin/paket-alat')
   } catch (err: unknown) {
-    errorMsg.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal menyimpan paket alat.'
+    errorMsg.value = extractErrorMessage(err, 'Gagal menyimpan paket alat.')
   } finally {
     saving.value = false
   }

@@ -106,6 +106,12 @@ const navGroups: NavGroup[] = [
         match: (p) => p.startsWith('/admin/peserta-trip'),
         icon: 'M6 7.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM2 13.5c0-2 1.8-3.5 4-3.5 1 0 1.9.3 2.6.8M10 11l1.5 1.5L14.5 9.5',
       },
+      {
+        label: 'Galeri Trip',
+        to: '/admin/galeri-trip',
+        match: (p) => p.startsWith('/admin/galeri-trip'),
+        icon: 'M2.5 3.5h11v9h-11v-9Zm1.5 7 2.5-2.5 2 2 2-2.5 2 3M5.8 6.2h.01',
+      },
     ],
   },
 ]

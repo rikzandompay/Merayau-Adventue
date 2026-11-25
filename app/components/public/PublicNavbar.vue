@@ -64,7 +64,7 @@ const waUrl = computed(() =>
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 border-b border-[#EAE5DA] bg-white/95 backdrop-blur-md">
+  <header class="sticky top-0 z-40 border-b border-[#EAE5DA] bg-white">
     <div class="mx-auto flex h-[64px] max-w-[1280px] items-center justify-between gap-2 px-3 sm:h-[74px] sm:gap-4 sm:px-6 lg:px-8">
       <NuxtLink to="/" class="flex min-w-0 flex-1 items-center gap-2 rounded-lg py-1 pr-0.5 sm:gap-3 sm:pr-2 lg:flex-none">
         <div class="h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-[#D6D0C4] bg-white p-0.5 shadow-xs sm:h-10 sm:w-10">

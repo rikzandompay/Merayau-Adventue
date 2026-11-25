@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const tripId = await db.transaction(async (tx) => {
-      const kodeTrip = body.kodeTrip?.toUpperCase() || `TRIP-${Date.now().toString().slice(-4)}`
+      const kodeTrip = body.kodeTrip?.toUpperCase() || generateUniqueKode('TRIP')
       const itineraryText = body.itinerary?.trim() || summarizeItineraryText(body.detail)
       const [ins] = await tx.insert(infoTrip).values({
         kodeTrip,

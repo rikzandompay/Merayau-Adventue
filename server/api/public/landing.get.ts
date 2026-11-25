@@ -5,6 +5,7 @@ import {
   masterAlat,
   paketAlat,
   paketAlatItem,
+  penyewa,
   pesertaTrip,
   tripMeetingPoint,
   tripPaket,
@@ -19,12 +20,12 @@ const SHOWCASE_GEAR_CODES = new Set([
   'LMP-05',
 ])
 
-const PRODUK_IMG_VERSION = 'hd3'
+const PRODUK_IMG_VERSION = 'hd4'
 
 const TRIP_FALLBACK_PHOTOS = [
-  '/images/landing/trip-prau.png',
-  '/images/landing/trip-merbabu.png',
-  '/images/landing/trip-lawu.png',
+  '/images/landing/trip-prau.webp',
+  '/images/landing/trip-merbabu.webp',
+  '/images/landing/trip-lawu.webp',
 ]
 
 function resolveGearPhoto(kodeAlat: string, foto: string | null): { url: string; isShowcase: boolean } {
@@ -53,10 +54,10 @@ function resolveTripPhoto(
   const first = detailGallery?.find((g) => Boolean(g?.trim()))?.trim()
   if (first) return first
   const lower = judul.toLowerCase()
-  if (lower.includes('prau')) return '/images/landing/trip-prau.png'
-  if (lower.includes('merbabu')) return '/images/landing/trip-merbabu.png'
-  if (lower.includes('lawu')) return '/images/landing/trip-lawu.png'
-  return TRIP_FALLBACK_PHOTOS[idx % TRIP_FALLBACK_PHOTOS.length] ?? '/images/landing/trip-prau.png'
+  if (lower.includes('prau')) return '/images/landing/trip-prau.webp'
+  if (lower.includes('merbabu')) return '/images/landing/trip-merbabu.webp'
+  if (lower.includes('lawu')) return '/images/landing/trip-lawu.webp'
+  return TRIP_FALLBACK_PHOTOS[idx % TRIP_FALLBACK_PHOTOS.length] ?? '/images/landing/trip-prau.webp'
 }
 
 function formatTierNote(
@@ -85,6 +86,7 @@ export default defineEventHandler(async () => {
     tripPaketRows,
     tripMepoRows,
     pesertaCounts,
+    penyewaCountRows,
     rentedMap,
     settingRow,
     enabledPromos,
@@ -132,6 +134,11 @@ export default defineEventHandler(async () => {
       })
       .from(pesertaTrip)
       .groupBy(pesertaTrip.idTrip),
+    db
+      .select({
+        total: sql<number>`COUNT(${penyewa.id})`,
+      })
+      .from(penyewa),
     getActiveRentedMap(db),
     getDefaultSetting(db),
     getEnabledPromos(db),
@@ -141,7 +148,7 @@ export default defineEventHandler(async () => {
   const livePromos = enabledPromos.filter((p) => isPromoLive(p, now))
 
   const aturan = {
-    durasiMinimalJam: settingRow?.durasiMinimalJam ?? 24,
+    durasiMinimalJam: settingRow?.durasiDasarJam ?? 24,
     toleransiTelatJam: settingRow?.toleransiTelatJam ?? 2,
     dendaPersenHarian: settingRow?.dendaPersenHarian ?? 30,
     minHariPromo: settingRow?.minHariPromo ?? 3,
@@ -241,7 +248,7 @@ export default defineEventHandler(async () => {
         promoAktif,
         upcomingPromo,
         kuotaTersedia,
-        fotoUrl: fotoClean || '/images/landing/paket-tektok.png',
+        fotoUrl: fotoClean || '/images/landing/paket-tektok.webp',
         items,
       }
     })
@@ -272,6 +279,8 @@ export default defineEventHandler(async () => {
     })
 
   const totalStokUnit = activeAlat.reduce((sum, a) => sum + a.stokTotal, 0)
+  const totalPenyewa = Number(penyewaCountRows[0]?.total ?? 0)
+  const totalPesertaTrip = pesertaCounts.reduce((sum, c) => sum + Number(c.total), 0)
   const hargaPaketMulai = packages.length
     ? Math.min(...packages.map((p) => p.hargaEfektif))
     : 0
@@ -310,6 +319,8 @@ export default defineEventHandler(async () => {
       totalAlatAktif: activeAlat.length,
       totalStokUnit,
       totalKategori: categories.filter((c) => c.jumlahAlat > 0).length,
+      totalPenyewa,
+      totalPesertaTrip,
       diskonPromoPersen: aturan.diskonPersen,
       minHariPromo: aturan.minHariPromo,
       hargaPaketMulai,

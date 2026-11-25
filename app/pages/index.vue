@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { FanSlideCard, FanTripGroup } from '~/components/public/FanTripGallery.vue'
+import type { FanTripGroup } from '~/components/public/FanTripGallery.vue'
 import type { GoogleReviewItem } from '~/components/public/TestimonialsMarquee.vue'
-import type { PublicTripItem } from '~/components/public/TripDetailModal.vue'
+import type { PublicTripItem } from '~/composables/useTripGallery'
 
 interface PublicPromoInfo {
   id: number
@@ -86,6 +86,8 @@ interface LandingPayload {
     totalAlatAktif: number
     totalStokUnit: number
     totalKategori: number
+    totalPenyewa?: number
+    totalPesertaTrip?: number
     diskonPromoPersen: number
     minHariPromo: number
     hargaPaketMulai: number
@@ -145,6 +147,8 @@ const stats = computed(
       totalAlatAktif: 58,
       totalStokUnit: 500,
       totalKategori: 6,
+      totalPenyewa: 0,
+      totalPesertaTrip: 0,
       diskonPromoPersen: 10,
       minHariPromo: 3,
       hargaPaketMulai: 49000,
@@ -168,15 +172,16 @@ const metricAnimStarted = ref(false)
 const metricAnimDone = ref(false)
 const metricYear = ref(2019)
 const metricStok = ref(stats.value.totalStokUnit)
-const metricPromo = ref(aturan.value.diskonPersen)
-const metricBundel = ref(30)
+const metricPenyewa = ref(stats.value.totalPenyewa ?? 0)
+const metricPesertaTrip = ref(stats.value.totalPesertaTrip ?? 0)
 
 watch(
-  [stats, aturan],
-  ([s, a]) => {
+  stats,
+  (s) => {
     if (!metricAnimStarted.value || metricAnimDone.value) {
       metricStok.value = s.totalStokUnit
-      metricPromo.value = a.diskonPersen
+      metricPenyewa.value = s.totalPenyewa ?? 0
+      metricPesertaTrip.value = s.totalPesertaTrip ?? 0
     }
   },
   { immediate: true },
@@ -190,7 +195,8 @@ function startMetricCountUp() {
   metricAnimStarted.value = true
 
   const targetStok = stats.value.totalStokUnit
-  const targetPromo = aturan.value.diskonPersen
+  const targetPenyewa = stats.value.totalPenyewa ?? 0
+  const targetPesertaTrip = stats.value.totalPesertaTrip ?? 0
   const startTime = performance.now()
   const duration = 850
 
@@ -199,16 +205,16 @@ function startMetricCountUp() {
     const eased = 1 - Math.pow(1 - t, 3)
     metricYear.value = Math.round(2005 + (2019 - 2005) * eased)
     metricStok.value = Math.round(targetStok * eased)
-    metricPromo.value = Math.round(targetPromo * eased)
-    metricBundel.value = Math.round(30 * eased)
+    metricPenyewa.value = Math.round(targetPenyewa * eased)
+    metricPesertaTrip.value = Math.round(targetPesertaTrip * eased)
 
     if (t < 1) {
       metricRaf = requestAnimationFrame(step)
     } else {
       metricYear.value = 2019
       metricStok.value = stats.value.totalStokUnit
-      metricPromo.value = aturan.value.diskonPersen
-      metricBundel.value = 30
+      metricPenyewa.value = stats.value.totalPenyewa ?? 0
+      metricPesertaTrip.value = stats.value.totalPesertaTrip ?? 0
       metricAnimDone.value = true
       metricRaf = null
     }
@@ -255,95 +261,13 @@ const kontak = computed(
     },
 )
 
-// Section 01d Fan Gallery groups: each mountain trip has its own 5-photo fan set
-const MOUNTAIN_GALLERY_SETS: Array<{
-  match: string
-  id: string
-  judul: string
-  tags: string[]
-  photos: Array<{ src: string; label: string; tag: string }>
-}> = [
-  {
-    match: 'prau',
-    id: 'trip-prau',
-    judul: 'Gunung Prau via Patak Banteng',
-    tags: ['Dieng · 2.565 MDPL', 'Favorit Pemula'],
-    photos: [
-      { src: '/images/landing/hero-hikers.png', label: 'Pendakian Jalur Patak Banteng', tag: 'Tim Merayau' },
-      { src: '/images/landing/gear-tnd-07.png', label: 'Camp Area Puncak Prau', tag: 'Dome 2-3 Org' },
-      { src: '/images/landing/trip-prau.png', label: 'Sunrise Golden Hour Prau', tag: 'Dieng · 2.565 MDPL' },
-      { src: '/images/landing/gear-cok-01.png', label: 'Sarapan Hangat di Camp', tag: 'Logistik Trip' },
-      { src: '/images/landing/store-pontianak.jpg', label: 'Persiapan Basecamp Pontianak', tag: 'Fitting H-1' },
-    ],
-  },
-  {
-    match: 'merbabu',
-    id: 'trip-merbabu',
-    judul: 'Merbabu via Selo (2D1N)',
-    tags: ['Boyolali · 3.145 MDPL', 'Sabana Terbuka'],
-    photos: [
-      { src: '/images/landing/gear-crr-01.png', label: 'Carrier Ekspedisi Sabana', tag: 'Carrier 50-60L' },
-      { src: '/images/landing/paket-tektok.png', label: 'Perlengkapan Tim Merbabu', tag: 'Siap Berangkat' },
-      { src: '/images/landing/trip-merbabu.png', label: 'Jalur Sabana Merbabu via Selo', tag: 'Boyolali · 3.145 MDPL' },
-      { src: '/images/landing/gear-trk-01.png', label: 'Jalur Berbatu & Punggungan', tag: 'Trekking Gear' },
-      { src: '/images/landing/extra-fan-1.png', label: 'Dokumentasi Tim Sabana', tag: 'Arsip Ekspedisi' },
-    ],
-  },
-  {
-    match: 'lawu',
-    id: 'trip-lawu',
-    judul: 'Gunung Lawu via Cetho',
-    tags: ['Karanganyar · 3.265 MDPL', 'Jalur Klasik'],
-    photos: [
-      { src: '/images/landing/gear-tnd-01.png', label: 'Basecamp Tenda Rombongan', tag: 'Double Layer' },
-      { src: '/images/landing/gear-lmp-05.png', label: 'Summit Attack Dini Hari', tag: 'Lampu & Power' },
-      { src: '/images/landing/trip-lawu.png', label: 'Hutan Cemara Lawu via Cetho', tag: 'Karanganyar · 3.265 MDPL' },
-      { src: '/images/landing/extra-fan-2.jpg', label: 'Punggungan Candi Cetho', tag: 'Arsip Ekspedisi' },
-      { src: '/images/landing/hero-hikers.png', label: 'Tim Puncak Hargo Dumilah', tag: '3.265 MDPL' },
-    ],
-  },
-]
-
+// Section 01d Fan Gallery groups: each mountain trip uses curated galleryItems or preset fallback
 const fanTripGroups = computed<FanTripGroup[]>(() => {
   const liveTrips = data.value?.trips ?? []
   const groups: FanTripGroup[] = []
 
   for (const t of liveTrips) {
-    const lower = t.judul.toLowerCase()
-    const preset = MOUNTAIN_GALLERY_SETS.find((p) => lower.includes(p.match))
-    const customPhotos: Array<{ src: string; label: string; tag: string }> = []
-    if (t.fotoUrl) {
-      customPhotos.push({ src: t.fotoUrl, label: t.judul, tag: t.detail?.elevation || t.lokasi })
-    }
-    for (const g of t.detail?.gallery ?? []) {
-      const clean = g?.trim()
-      if (clean && !customPhotos.some((x) => x.src === clean)) {
-        customPhotos.push({ src: clean, label: t.judul, tag: t.lokasi })
-      }
-    }
-
-    const basePreset = preset?.photos ?? MOUNTAIN_GALLERY_SETS[groups.length % MOUNTAIN_GALLERY_SETS.length]!.photos
-    const combined = [...customPhotos]
-    for (const p of basePreset) {
-      if (combined.length >= 5) break
-      if (!combined.some((x) => x.src === p.src)) {
-        combined.push(p)
-      }
-    }
-    while (combined.length < 5) {
-      combined.push(basePreset[combined.length % basePreset.length]!)
-    }
-
-    // Put hero photo at center index 2 when using preset/gallery
-    const five = combined.slice(0, 5)
-    if (customPhotos.length === 1 && preset) {
-      const heroIdx = preset.photos.findIndex((p) => p.src === preset.photos[2]?.src)
-      if (heroIdx !== -1 && preset.photos.length === 5) {
-        five.splice(0, 5, ...preset.photos)
-        five[2] = { src: t.fotoUrl || preset.photos[2]!.src, label: t.judul, tag: t.detail?.elevation || t.lokasi }
-      }
-    }
-
+    const five = resolveTripGalleryCards(t, groups.length)
     groups.push({
       id: `trip-${t.id}`,
       judul: t.judul,
@@ -386,10 +310,10 @@ const fanTripGroups = computed<FanTripGroup[]>(() => {
 const trips = computed(() => data.value?.trips ?? [])
 
 const choreographyImages = computed(() => ({
-  topLeft: trips.value[1]?.fotoUrl || '/images/landing/trip-prau.png',
-  topRight: trips.value[0]?.fotoUrl || '/images/landing/trip-merbabu.png',
-  bottomLeft: trips.value[2]?.fotoUrl || '/images/landing/trip-lawu.png',
-  bottomRight: '/images/landing/gear-tnd-07.png',
+  topLeft: trips.value[1]?.fotoUrl || '/images/landing/trip-prau.webp',
+  topRight: trips.value[0]?.fotoUrl || '/images/landing/trip-merbabu.webp',
+  bottomLeft: trips.value[2]?.fotoUrl || '/images/landing/trip-lawu.webp',
+  bottomRight: '/images/landing/gear-tnd-07.webp',
 }))
 
 const choreographyLabels = computed(() => ({
@@ -587,21 +511,6 @@ const rentalRules = computed(() => [
   },
 ])
 
-const dismissedRuleIds = ref<string[]>([])
-const visibleRentalRules = computed(() =>
-  rentalRules.value.filter((r) => !dismissedRuleIds.value.includes(r.id)),
-)
-
-function dismissRule(id: string) {
-  if (!dismissedRuleIds.value.includes(id)) {
-    dismissedRuleIds.value.push(id)
-  }
-}
-
-function resetRules() {
-  dismissedRuleIds.value = []
-}
-
 // Section 05 Validated Contact Form -> opens structured WhatsApp
 const contactForm = reactive({
   nama: '',
@@ -788,7 +697,7 @@ function submitContactForm() {
             >
               <img
                 data-parallax-top="0.14"
-                src="/images/landing/hero-hikers.png"
+                src="/images/landing/hero-hikers.webp"
                 alt="Pendaki membawa perlengkapan gunung Merayau Adventure"
                 class="mry-parallax-layer mx-auto block max-h-[420px] w-full max-w-[460px] object-contain object-bottom mix-blend-multiply sm:max-h-[480px] sm:max-w-[520px] lg:mx-0 lg:max-h-[540px] lg:w-auto lg:max-w-[48vw] lg:object-right-bottom"
               />
@@ -878,7 +787,7 @@ function submitContactForm() {
                 class="overflow-hidden rounded-3xl border-4 border-white/85 bg-[#EAE5DA] shadow-xl"
               >
                 <img
-                  src="/images/landing/store-pontianak.jpg"
+                  src="/images/landing/store-pontianak.webp"
                   alt="Basecamp fisik Merayau Adventure di Pontianak"
                   class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 />
@@ -942,25 +851,27 @@ function submitContactForm() {
 
             <div style="--stagger-delay: 180ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
-                Promo Multi-Hari
+                Penyewa Alat
               </div>
               <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">
-                {{ metricPromo }}%
+                {{ metricPenyewa }}
               </div>
-              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Otomatis</div>
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Orang Terdaftar</div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
-                Diskon langsung di sistem untuk penyewaan durasi minimal {{ aturan.minHariPromo }} hari.
+                Penyewa yang tercatat menggunakan layanan sewa perlengkapan di sistem basecamp.
               </p>
             </div>
 
             <div style="--stagger-delay: 270ms" class="mry-stagger-item min-w-0 space-y-1.5 border-l-2 border-[#EAE5DA] pl-3.5 sm:pl-5">
               <div class="mry-mono text-[11px] font-semibold tracking-[0.12em] text-[#1E4D36] uppercase">
-                Paket Tektok
+                Peserta Open Trip
               </div>
-              <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">{{ metricBundel }}%</div>
-              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Lebih Hemat</div>
+              <div class="mry-serif mry-mono text-2xl font-semibold text-[#121613] sm:text-3xl">
+                {{ metricPesertaTrip }}
+              </div>
+              <div class="text-sm font-semibold text-[#2E3530] sm:text-base">Pernah Ikut Trip</div>
               <p class="text-xs leading-relaxed text-[#5C645E]">
-                Bundel perlengkapan siap jalan mulai {{ formatRupiah(stats.hargaPaketMulai) }} / 24 jam.
+                Pendaki yang tercatat bergabung pada jadwal open trip bersama Merayau Adventure.
               </p>
             </div>
           </div>
@@ -1030,7 +941,7 @@ function submitContactForm() {
                   </NuxtLink>
                   <a
                     href="#open-trip-ledger"
-                    class="inline-flex min-h-[46px] items-center rounded-full border border-white/35 bg-black/40 px-5 text-sm font-semibold text-white backdrop-blur-xs transition-colors hover:bg-white/20"
+                    class="inline-flex min-h-[46px] items-center rounded-full border border-white/35 bg-black/60 px-5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
                   >
                     Lihat Daftar Jadwal ↓
                   </a>
@@ -1378,7 +1289,7 @@ function submitContactForm() {
       </section>
 
       <!-- 04 · KATALOG ALAT BASECAMP - INFINITE HORIZONTAL MARQUEE -->
-      <section id="katalog-marquee" class="overflow-x-clip border-b border-[#EAE5DA] bg-[#FDFCFA] py-12 sm:py-20">
+      <section id="katalog-marquee" class="mry-defer-section overflow-x-clip border-b border-[#EAE5DA] bg-[#FDFCFA] py-12 sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
           <div data-reveal style="--reveal-delay: 0ms" class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
@@ -1485,7 +1396,7 @@ function submitContactForm() {
       </section>
 
       <!-- 04b · ALUR & ATURAN SEWA (Light Theme) -->
-      <section id="aturan-sewa" class="overflow-x-clip bg-white py-12 sm:py-20">
+      <section id="aturan-sewa" class="mry-defer-section overflow-x-clip bg-white py-12 sm:py-20">
         <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
           <div data-reveal style="--reveal-delay: 0ms" class="max-w-2xl">
             <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">
@@ -1545,33 +1456,20 @@ function submitContactForm() {
             </div>
           </div>
 
-          <!-- 8 Semantic Outlined Rule Toast/Alert Cards (Dismissible + Reset) -->
+          <!-- 8 Semantic Outlined Rule Cards -->
           <div class="mt-12">
-            <div data-reveal style="--reveal-delay: 0ms" class="flex flex-wrap items-center justify-between gap-3">
+            <div data-reveal style="--reveal-delay: 0ms">
               <h3 class="text-lg font-semibold text-[#121613]">
-                Aturan Sewa Merayau Adventure ({{ visibleRentalRules.length }} / {{ rentalRules.length }})
+                Aturan Sewa Merayau Adventure ({{ rentalRules.length }})
               </h3>
-              <button
-                v-if="dismissedRuleIds.length > 0"
-                type="button"
-                class="min-h-[38px] cursor-pointer rounded-full border border-[#D6D0C4] bg-white px-4 text-xs font-semibold text-[#121613] transition-colors hover:border-[#1E4D36] hover:bg-[#F5F2EB]"
-                @click="resetRules"
-              >
-                Reset Semua Aturan ({{ rentalRules.length }})
-              </button>
             </div>
 
-            <div data-reveal-stagger>
-              <TransitionGroup
-                name="mry-toast-list"
-                tag="div"
-                class="mt-4 grid gap-4 md:grid-cols-2"
-              >
-                <div
-                  v-for="(rule, idx) in visibleRentalRules"
-                  :key="rule.id"
-                  :style="`--stagger-delay: ${(idx % 2) * 80 + Math.floor(idx / 2) * 55}ms`"
-                  class="mry-stagger-item flex items-start gap-4 rounded-xl border bg-white p-4 transition-shadow duration-200 hover:shadow-sm sm:p-5"
+            <div data-reveal-stagger class="mt-4 grid gap-4 md:grid-cols-2">
+              <div
+                v-for="(rule, idx) in rentalRules"
+                :key="rule.id"
+                :style="`--stagger-delay: ${(idx % 2) * 80 + Math.floor(idx / 2) * 55}ms`"
+                class="mry-stagger-item flex items-start gap-4 rounded-xl border bg-white p-4 transition-shadow duration-200 hover:shadow-sm sm:p-5"
                 :class="{
                   'border-blue-200 bg-blue-50/35': rule.tone === 'info',
                   'border-emerald-200 bg-emerald-50/35': rule.tone === 'good',
@@ -1609,18 +1507,7 @@ function submitContactForm() {
                   <div class="text-sm font-bold text-[#121613]">{{ rule.title }}</div>
                   <p class="mt-1 text-sm leading-relaxed text-[#2E3530]">{{ rule.desc }}</p>
                 </div>
-                <button
-                  type="button"
-                  class="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#5C645E] transition-colors hover:bg-black/5 hover:text-[#121613]"
-                  :aria-label="`Tutup ${rule.title}`"
-                  @click="dismissRule(rule.id)"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  </svg>
-                </button>
               </div>
-              </TransitionGroup>
             </div>
 
             <div data-reveal style="--reveal-delay: 100ms" class="mry-mono mt-5 rounded-xl border border-red-200 bg-red-50/60 px-4 py-3 text-center text-xs font-medium text-red-900">
@@ -1631,7 +1518,7 @@ function submitContactForm() {
       </section>
 
       <!-- 05 · KONTAK BASECAMP -->
-      <section id="kontak" class="overflow-x-clip border-t border-[#EAE5DA] bg-[#F5F2EB] py-12 sm:py-20">
+      <section id="kontak" class="mry-defer-section overflow-x-clip border-t border-[#EAE5DA] bg-[#F5F2EB] py-12 sm:py-20">
         <div class="mx-auto grid max-w-[1280px] gap-8 px-4 sm:gap-10 sm:px-6 lg:grid-cols-12 lg:px-8">
           <div data-reveal-left style="--reveal-delay: 0ms" class="min-w-0 space-y-5 lg:col-span-5">
             <p class="mry-mono text-xs font-semibold tracking-[0.14em] text-[#1E4D36] uppercase">

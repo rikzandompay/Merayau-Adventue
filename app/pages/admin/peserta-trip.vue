@@ -116,6 +116,7 @@ watch([() => form.idTripPaket, () => form.statusBayar], () => {
 
 const saving = ref(false)
 const modalErr = ref('')
+const actionErr = ref('')
 
 async function submitPeserta() {
   modalErr.value = ''
@@ -134,22 +135,25 @@ async function submitPeserta() {
     showAddModal.value = false
     await refresh()
   } catch (err: unknown) {
-    modalErr.value =
-      (err as { data?: { statusMessage?: string }; statusMessage?: string })?.data?.statusMessage ||
-      'Gagal mendaftarkan peserta.'
+    modalErr.value = extractErrorMessage(err, 'Gagal mendaftarkan peserta.')
   } finally {
     saving.value = false
   }
 }
 
 async function markStatus(row: PesertaRow, nextStatus: 'Lunas' | 'DP 50%' | 'Belum Bayar') {
+  actionErr.value = ''
   const full = row.hargaPaket ?? Math.max(row.nominalBayar, 450000)
   const nextNominal = nextStatus === 'Lunas' ? full : nextStatus === 'DP 50%' ? Math.round(full * 0.5) : 0
-  await $fetch(`/api/admin/peserta-trip/${row.id}`, {
-    method: 'PUT',
-    body: { statusBayar: nextStatus, nominalBayar: nextNominal },
-  })
-  await refresh()
+  try {
+    await $fetch(`/api/admin/peserta-trip/${row.id}`, {
+      method: 'PUT',
+      body: { statusBayar: nextStatus, nominalBayar: nextNominal },
+    })
+    await refresh()
+  } catch (err: unknown) {
+    actionErr.value = extractErrorMessage(err, 'Gagal memperbarui status pembayaran.')
+  }
 }
 </script>
 
@@ -232,6 +236,13 @@ async function markStatus(row: PesertaRow, nextStatus: 'Lunas' | 'DP 50%' | 'Bel
     </div>
 
     <section class="ed-card overflow-hidden">
+      <div
+        v-if="actionErr"
+        class="border-b px-4 py-2.5 text-xs font-medium"
+        style="background-color: var(--srf-bad-soft); border-color: var(--srf-bad-border); color: var(--srf-bad-ink)"
+      >
+        {{ actionErr }}
+      </div>
       <div class="flex flex-wrap items-center justify-between gap-3 p-4">
         <input
           v-model="search"

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { extname, resolve } from 'node:path'
-import mysql from 'mysql2/promise'
+import * as mysql from 'mysql2/promise'
 import { put } from '@vercel/blob'
 
 try {

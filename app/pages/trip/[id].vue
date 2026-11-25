@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicTripItem, PublicTripPaket } from '~/components/public/TripDetailModal.vue'
+import type { PublicTripItem, PublicTripPaket } from '~/composables/useTripGallery'
 
 const route = useRoute()
 const cart = usePublicCart()
