@@ -114,6 +114,17 @@ const navGroups: NavGroup[] = [
       },
     ],
   },
+  {
+    title: 'PENGATURAN',
+    items: [
+      {
+        label: 'Pengaturan Profil',
+        to: '/admin/profil',
+        match: (p) => p.startsWith('/admin/profil'),
+        icon: 'M8 7.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3 13.5c0-2.2 2.2-3.5 5-3.5s5 1.3 5 3.5',
+      },
+    ],
+  },
 ]
 
 watch(
@@ -207,14 +218,18 @@ watch(
           Lihat Website Publik ↗
         </NuxtLink>
         <div class="ed-well flex items-center justify-between gap-2 px-3 py-2.5">
-          <div class="min-w-0">
+          <NuxtLink
+            to="/admin/profil"
+            class="min-w-0 flex-1 rounded transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2"
+            style="outline-color: var(--srf-accent)"
+          >
             <div class="truncate text-xs font-semibold" style="color: var(--srf-ink)">
               {{ user?.nama || 'Admin Basecamp' }}
             </div>
             <div class="truncate text-[11px]" style="color: var(--srf-ink-3)">
-              Basecamp Sleman · Aktif
+              {{ user?.email || 'Pengaturan Profil' }}
             </div>
-          </div>
+          </NuxtLink>
           <button type="button" class="cursor-pointer rounded px-2 py-1 text-xs font-semibold hover:underline"
             style="color: var(--srf-bad)" @click="logout">
             Keluar

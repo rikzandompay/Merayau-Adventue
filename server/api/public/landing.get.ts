@@ -1,5 +1,6 @@
 import { asc, desc, eq, sql } from 'drizzle-orm'
 import {
+  admins,
   infoTrip,
   kategoriAlat,
   masterAlat,
@@ -20,7 +21,7 @@ const SHOWCASE_GEAR_CODES = new Set([
   'LMP-05',
 ])
 
-const PRODUK_IMG_VERSION = 'hd4'
+const PRODUK_IMG_VERSION = 'hd5'
 
 const TRIP_FALLBACK_PHOTOS = [
   '/images/landing/trip-prau.webp',
@@ -90,6 +91,7 @@ export default defineEventHandler(async () => {
     rentedMap,
     settingRow,
     enabledPromos,
+    primaryAdminRows,
   ] = await Promise.all([
     db
       .select({
@@ -142,6 +144,14 @@ export default defineEventHandler(async () => {
     getActiveRentedMap(db),
     getDefaultSetting(db),
     getEnabledPromos(db),
+    db
+      .select({
+        email: admins.email,
+        noTelepon: admins.noTelepon,
+      })
+      .from(admins)
+      .orderBy(asc(admins.id))
+      .limit(1),
   ])
 
   const now = new Date()
@@ -307,6 +317,12 @@ export default defineEventHandler(async () => {
     statusBerjalan: getPromoRuntimeStatus(p, now),
   }))
 
+  const primaryAdmin = primaryAdminRows[0]
+  const normalizedWa = normalizeWhatsappNumber(primaryAdmin?.noTelepon || '')
+  const whatsapp = isValidWhatsappNumber(normalizedWa) ? normalizedWa : DEFAULT_CONTACT_WHATSAPP
+  const whatsappDisplay = formatWhatsappDisplay(whatsapp)
+  const email = primaryAdmin?.email?.trim() || DEFAULT_CONTACT_EMAIL
+
   return {
     alat: activeAlat,
     categories,
@@ -326,9 +342,9 @@ export default defineEventHandler(async () => {
       hargaPaketMulai,
     },
     kontak: {
-      whatsapp: '6285156549003',
-      whatsappDisplay: '+62 851-5654-9003',
-      email: 'admin@merayau.id',
+      whatsapp,
+      whatsappDisplay,
+      email,
       alamat:
         'Jl. Tanjung Raya 2 Gg. Nusa Abadi No. 22b (gang tepat di samping Mr. DIY Tanray 2), Pontianak, Kalimantan Barat',
       alamatSingkat: 'Jl. Tanjung Raya 2 Gg. Nusa Abadi No. 22b, Pontianak',

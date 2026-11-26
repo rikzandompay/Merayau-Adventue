@@ -18,6 +18,7 @@ export const admins = mysqlTable(
     id: int('id').autoincrement().primaryKey(),
     nama: varchar('nama', { length: 120 }).notNull(),
     email: varchar('email', { length: 160 }).notNull(),
+    noTelepon: varchar('no_telepon', { length: 30 }),
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     role: varchar('role', { length: 30 }).notNull().default('admin'),
     createdAt: timestamp('created_at').defaultNow().notNull(),

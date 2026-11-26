@@ -45,6 +45,7 @@ async function main() {
     const [ins] = await db.insert(admins).values({
       nama: 'Admin Basecamp Sleman',
       email: adminEmail,
+      noTelepon: '6285156549003',
       passwordHash: hashPassword(adminPassword),
       role: 'admin',
     })
