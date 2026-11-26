@@ -1,6 +1,5 @@
 import { asc, desc, eq, sql } from 'drizzle-orm'
 import {
-  admins,
   infoTrip,
   kategoriAlat,
   masterAlat,
@@ -91,7 +90,7 @@ export default defineEventHandler(async () => {
     rentedMap,
     settingRow,
     enabledPromos,
-    primaryAdminRows,
+    primaryContact,
   ] = await Promise.all([
     db
       .select({
@@ -144,14 +143,7 @@ export default defineEventHandler(async () => {
     getActiveRentedMap(db),
     getDefaultSetting(db),
     getEnabledPromos(db),
-    db
-      .select({
-        email: admins.email,
-        noTelepon: admins.noTelepon,
-      })
-      .from(admins)
-      .orderBy(asc(admins.id))
-      .limit(1),
+    getPrimaryAdminContact(),
   ])
 
   const now = new Date()
@@ -317,11 +309,7 @@ export default defineEventHandler(async () => {
     statusBerjalan: getPromoRuntimeStatus(p, now),
   }))
 
-  const primaryAdmin = primaryAdminRows[0]
-  const normalizedWa = normalizeWhatsappNumber(primaryAdmin?.noTelepon || '')
-  const whatsapp = isValidWhatsappNumber(normalizedWa) ? normalizedWa : DEFAULT_CONTACT_WHATSAPP
-  const whatsappDisplay = formatWhatsappDisplay(whatsapp)
-  const email = primaryAdmin?.email?.trim() || DEFAULT_CONTACT_EMAIL
+  const { whatsapp, whatsappDisplay, email } = primaryContact
 
   return {
     alat: activeAlat,

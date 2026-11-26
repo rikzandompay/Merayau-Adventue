@@ -9,6 +9,7 @@ const updateProfileSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  await ensureAdminPhoneColumn()
   const adminId = event.context.admin?.id as number
   const body = await parseValidatedBody(event, updateProfileSchema)
 
