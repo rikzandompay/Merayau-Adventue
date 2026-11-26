@@ -635,3 +635,14 @@ html:has(.mry-public) {
 .mry-drawer-leave-to .mry-drawer-panel {
   transform: translateX(100%);
 }
+
+/* MerayauChatbot panel transition */
+.mry-chat-enter-active,
+.mry-chat-leave-active {
+  transition: opacity 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mry-chat-enter-from,
+.mry-chat-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}

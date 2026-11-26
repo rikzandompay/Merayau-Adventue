@@ -945,6 +945,14 @@ const waBookingUrl = computed(() => {
 
     <PublicRentalCartDrawer :aturan="aturan" :whatsapp="kontak.whatsapp" :promos="data?.promos" />
 
+    <PublicMerayauChatbot
+      :aturan="aturan"
+      :whatsapp="kontak.whatsapp"
+      :promos="data?.promos"
+      bottom-offset-mode="trip-bar"
+      :hide-when-trip-bar-visible="Boolean(trip && !isBookingPanelVisible)"
+    />
+
     <!-- Mobile Quick Booking Bar (hidden when #booking-panel is visible) -->
     <div
       v-if="trip && !isBookingPanelVisible"

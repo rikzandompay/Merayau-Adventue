@@ -480,6 +480,13 @@ function resetFilters() {
 
     <PublicRentalCartDrawer :aturan="aturan" :whatsapp="kontak.whatsapp" :promos="data?.promos" />
 
+    <PublicMerayauChatbot
+      :aturan="aturan"
+      :whatsapp="kontak.whatsapp"
+      :promos="data?.promos"
+      bottom-offset-mode="cart-mobile"
+    />
+
     <button
       v-if="cart.totalCount.value > 0"
       type="button"

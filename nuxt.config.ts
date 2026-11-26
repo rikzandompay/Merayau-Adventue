@@ -39,5 +39,7 @@ export default defineNuxtConfig({
     dbName: process.env.DB_NAME || 'merayau_outdoor',
     dbSsl: process.env.DB_SSL || '',
     blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN || '',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
   },
 })

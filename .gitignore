@@ -26,3 +26,7 @@ logs
 # Runtime uploaded media
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Local promo video assets & draft specs
+promo-video/
+spesifikasi_payment_gateway_mandiri_qris_dana_n8n.md

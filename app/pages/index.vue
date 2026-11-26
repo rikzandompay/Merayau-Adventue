@@ -1714,6 +1714,14 @@ function submitContactForm() {
     <!-- Slide-Over Nota Estimasi Sewa -->
     <PublicRentalCartDrawer :aturan="aturan" :whatsapp="kontak.whatsapp" :promos="data?.promos" />
 
+    <!-- Asisten Pemesanan Merayau Adventure -->
+    <PublicMerayauChatbot
+      :aturan="aturan"
+      :whatsapp="kontak.whatsapp"
+      :promos="data?.promos"
+      bottom-offset-mode="cart-always"
+    />
+
     <!-- Floating Toast & Cart Pill -->
     <div
       v-if="cart.toastMessage.value"
