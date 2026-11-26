@@ -646,3 +646,33 @@ html:has(.mry-public) {
   opacity: 0;
   transform: translateY(10px);
 }
+
+/* MerayauChatbot WhatsApp-style typing indicator (active only while loading) */
+@keyframes mry-typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.mry-typing-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: #5c645e;
+  animation: mry-typing-bounce 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mry-typing-dot {
+    animation: none;
+    opacity: 0.8;
+  }
+}

@@ -213,7 +213,10 @@ onBeforeUnmount(() => {
               <h2 class="mry-serif truncate text-lg font-semibold text-[#121613]">
                 Bantuan Pemesanan
               </h2>
-              <p class="truncate text-xs text-[#5C645E]">
+              <p v-if="chat.isLoading.value" class="truncate text-xs font-medium text-[#1E4D36]">
+                sedang mengetik...
+              </p>
+              <p v-else class="truncate text-xs text-[#5C645E]">
                 Info stok alat, paket, trip &amp; sewa
               </p>
             </div>
@@ -466,10 +469,15 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Loading State -->
+            <!-- Loading State (WhatsApp-style typing bubble) -->
             <div v-if="chat.isLoading.value" role="status" class="flex justify-start">
-              <div class="rounded-2xl rounded-bl-sm border border-[#EAE5DA] bg-[#F5F2EB] px-3.5 py-2.5 text-xs font-medium text-[#5C645E]">
-                Memeriksa data basecamp...
+              <div
+                class="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-[#EAE5DA] bg-[#F5F2EB] px-4 py-3.5"
+              >
+                <span class="mry-typing-dot" aria-hidden="true" />
+                <span class="mry-typing-dot" style="animation-delay: 160ms" aria-hidden="true" />
+                <span class="mry-typing-dot" style="animation-delay: 320ms" aria-hidden="true" />
+                <span class="sr-only">Asisten sedang mengetik balasan...</span>
               </div>
             </div>
 
