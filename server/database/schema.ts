@@ -21,6 +21,7 @@ export const admins = mysqlTable(
     noTelepon: varchar('no_telepon', { length: 30 }),
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     role: varchar('role', { length: 30 }).notNull().default('admin'),
+    tokenVersion: int('token_version', { unsigned: true }).notNull().default(1),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => [uniqueIndex('uq_admins_email').on(t.email)],
@@ -304,5 +305,27 @@ export const riwayatPenyewa = mysqlTable(
     uniqueIndex('uq_riwayat_penyewa_sewa').on(t.idSewa),
     index('idx_riwayat_penyewa_penyewa').on(t.idPenyewa, t.tanggalKembaliAktual),
     index('idx_riwayat_penyewa_kembali').on(t.tanggalKembaliAktual),
+  ],
+)
+
+export const securityAuditLogs = mysqlTable(
+  'security_audit_logs',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    eventType: varchar('event_type', { length: 80 }).notNull(),
+    severity: mysqlEnum('severity', ['info', 'warn', 'critical']).notNull().default('info'),
+    adminId: int('admin_id').references(() => admins.id, { onDelete: 'set null' }),
+    actorEmail: varchar('actor_email', { length: 160 }),
+    ipAddress: varchar('ip_address', { length: 64 }),
+    userAgent: varchar('user_agent', { length: 255 }),
+    targetType: varchar('target_type', { length: 60 }),
+    targetId: varchar('target_id', { length: 64 }),
+    metadataJson: text('metadata_json'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('idx_security_audit_created').on(t.createdAt),
+    index('idx_security_audit_event_created').on(t.eventType, t.createdAt),
+    index('idx_security_audit_severity_created').on(t.severity, t.createdAt),
   ],
 )

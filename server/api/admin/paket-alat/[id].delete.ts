@@ -12,6 +12,14 @@ export default defineEventHandler(async (event) => {
   const [refs] = await db.select({ total: count() }).from(detailSewa).where(eq(detailSewa.idPaket, id))
   if (Number(refs?.total ?? 0) > 0) {
     await db.update(paketAlat).set({ statusAktif: false }).where(eq(paketAlat.id, id))
+    invalidateChatbotSnapshotCache()
+    await recordSecurityAudit(event, {
+      eventType: 'admin.paket_soft_disabled',
+      severity: 'info',
+      targetType: 'paket_alat',
+      targetId: id,
+      metadata: { kodePaket: existing.kodePaket },
+    })
     return {
       ok: true,
       softDisabled: true,
@@ -20,6 +28,14 @@ export default defineEventHandler(async (event) => {
   }
 
   await db.delete(paketAlat).where(eq(paketAlat.id, id))
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.paket_deleted',
+    severity: 'warn',
+    targetType: 'paket_alat',
+    targetId: id,
+    metadata: { kodePaket: existing.kodePaket },
+  })
   return { ok: true, softDisabled: false }
 })
 

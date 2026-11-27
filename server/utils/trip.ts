@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { safeRequiredImageUrlSchema } from './http'
 
 export interface TripItinerarySchedule {
   time: string
@@ -102,7 +103,7 @@ const tripPackageCardSchema = z.object({
 })
 
 export const tripGalleryItemSchema = z.object({
-  src: z.string().trim().min(1).max(500),
+  src: safeRequiredImageUrlSchema(500),
   label: z.string().trim().max(120).optional().default(''),
   tag: z.string().trim().max(60).optional().default(''),
 })
@@ -112,7 +113,7 @@ export const tripDetailSchema = z.object({
   difficulty: z.string().trim().max(40).optional().default('Menengah'),
   tipeTrip: z.string().trim().max(120).optional().default(''),
   deskripsi: z.string().trim().max(3000).optional().default(''),
-  gallery: z.array(z.string().trim().max(500)).max(8).optional().default([]),
+  gallery: z.array(safeRequiredImageUrlSchema(500)).max(8).optional().default([]),
   galleryItems: z.array(tripGalleryItemSchema).max(5).optional(),
   packageCards: z.array(tripPackageCardSchema).max(10).optional().default([]),
   comparisons: z.array(tripFeatureComparisonSchema).max(40).optional().default([]),

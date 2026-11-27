@@ -10,6 +10,16 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Penyewa tidak ditemukan.' })
     }
     await db.delete(penyewa).where(eq(penyewa.id, id))
+
+    await recordSecurityAudit(event, {
+      eventType: 'admin.penyewa_deleted',
+      severity: 'warn',
+      targetType: 'penyewa',
+      targetId: id,
+      metadata: { nama: existing.nama, noIdentitas: existing.noIdentitas },
+      notify: true,
+    })
+
     return { ok: true }
   } catch (err) {
     rethrowDbConflict(
@@ -19,4 +29,3 @@ export default defineEventHandler(async (event) => {
     )
   }
 })
-

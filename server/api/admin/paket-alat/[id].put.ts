@@ -7,7 +7,7 @@ const updatePaketSchema = z.object({
   tipePaket: z.enum(['paket', 'bundle']).optional(),
   deskripsi: z.string().trim().max(500).nullable().optional(),
   labelPromo: z.string().trim().max(60).nullable().optional(),
-  foto: z.string().trim().max(255).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(255),
   diskonPersen: z.coerce.number().int().min(0).max(95).optional(),
   tarifPaket: z.coerce.number().int().min(1, 'Tarif paket wajib diisi lebih dari 0.').max(100_000_000).optional(),
   statusAktif: z.boolean().optional(),
@@ -73,6 +73,7 @@ export default defineEventHandler(async (event) => {
     return row
   })
 
+  invalidateChatbotSnapshotCache()
   return updated
 })
 

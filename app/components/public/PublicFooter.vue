@@ -12,7 +12,7 @@ const props = withDefaults(
     totalAlat: 58,
     whatsapp: '6285156549003',
     whatsappDisplay: '+62 851-5654-9003',
-    email: 'admin@merayau.id',
+    email: 'halo@merayau.id',
     alamat:
       'Jl. Tanjung Raya 2 Gg. Nusa Abadi No. 22b (gang tepat di samping Mr. DIY Tanray 2), Pontianak, Kalimantan Barat',
     mapsUrl:

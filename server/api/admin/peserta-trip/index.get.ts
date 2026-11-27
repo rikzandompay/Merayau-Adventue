@@ -83,6 +83,7 @@ export default defineEventHandler(async (event) => {
   return {
     items: filtered.map((r) => ({
       ...r,
+      noIdentitasMasked: maskIdentityNumber(r.noIdentitas),
       lokasiMepoFinal: r.mepoCustom?.trim() || r.namaMeetingPoint || 'Belum dipilih',
     })),
     trips: tripsWithMeta,

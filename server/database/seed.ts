@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import { count, eq } from 'drizzle-orm'
 import {
   admins,
@@ -37,18 +38,32 @@ async function main() {
     })
   }
 
-  const adminEmail = process.env.ADMIN_SEED_EMAIL || 'admin@merayau.id'
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD || 'merayau123'
+  const adminEmail = (process.env.ADMIN_SEED_EMAIL || 'admin@merayau.id').trim().toLowerCase()
+  const rawSeedPassword = (process.env.ADMIN_SEED_PASSWORD || '').trim()
+  const WEAK_SEED_PASSWORDS = new Set(['change-me', 'merayau123', 'password', 'admin123', '12345678'])
 
   let [admin] = await db.select().from(admins).where(eq(admins.email, adminEmail)).limit(1)
   if (!admin) {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      (rawSeedPassword.length < 12 || WEAK_SEED_PASSWORDS.has(rawSeedPassword.toLowerCase()))
+    ) {
+      throw new Error(
+        'ADMIN_SEED_PASSWORD wajib diset minimal 12 karakter non-default pada environment production.',
+      )
+    }
+    const generated = !rawSeedPassword
+    const adminPassword = rawSeedPassword || randomBytes(12).toString('base64url')
     const [ins] = await db.insert(admins).values({
       nama: 'Admin Basecamp Sleman',
       email: adminEmail,
       noTelepon: '6285156549003',
-      passwordHash: hashPassword(adminPassword),
+      passwordHash: await hashPassword(adminPassword),
       role: 'admin',
     })
+    if (generated) {
+      console.log(`[seed] Akun admin awal dibuat (${adminEmail}). Segera ganti kata sandi setelah login pertama.`)
+    }
     const [created] = await db.select().from(admins).where(eq(admins.id, Number(ins.insertId))).limit(1)
     admin = created!
   }

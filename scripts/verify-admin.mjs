@@ -90,13 +90,30 @@ async function run() {
       body: goodFd,
     })
     assert.equal(goodUpload.res.status, 200, 'valid jpeg upload should succeed')
-    assert.equal(goodUpload.data.sizeBytes, logoStat.size)
+    assert.ok(
+      goodUpload.data.sizeBytes > 0 && goodUpload.data.sizeBytes <= logoStat.size,
+      'sanitized jpeg size must be positive and not exceed source size',
+    )
     created.uploadPath = resolve(process.cwd(), 'public', goodUpload.data.url.replace(/^\//, ''))
 
     const servedImg = await fetch(`${BASE}${goodUpload.data.url}`)
     assert.equal(servedImg.status, 200, 'uploaded file must be servable at runtime')
+    assert.equal(servedImg.headers.get('x-content-type-options'), 'nosniff')
+    assert.ok((servedImg.headers.get('content-security-policy') || '').includes("default-src 'none'"))
     const servedBuf = Buffer.from(await servedImg.arrayBuffer())
-    assert.equal(servedBuf.length, logoStat.size)
+    assert.equal(servedBuf.length, goodUpload.data.sizeBytes)
+
+    // Polyglot / truncated magic-byte-only JPEG must be rejected
+    const fakeJpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(32, 0x41)])
+    const polyFd = new FormData()
+    polyFd.append('folder', 'paket')
+    polyFd.append('file', new Blob([fakeJpeg], { type: 'image/jpeg' }), 'polyglot.jpg')
+    const polyUpload = await req('/api/admin/upload', {
+      method: 'POST',
+      headers: authHeaders,
+      body: polyFd,
+    })
+    assert.equal(polyUpload.res.status, 400, 'corrupt/polyglot jpeg header must be rejected')
 
     // 6. Create package with automatic 30% discount
     const t1 = activeTools[0]
@@ -108,6 +125,8 @@ async function run() {
       headers: { ...authHeaders, 'content-type': 'application/json' },
       body: JSON.stringify({
         namaPaket: 'Paket Uji Otomatis',
+        tarifPaket: expectedTarif,
+        diskonPersen: 30,
         foto: goodUpload.data.url,
         statusAktif: true,
         items: [
@@ -252,23 +271,99 @@ async function run() {
     assert.equal(pesertaList.data.kpis.dp50, 1)
     assert.equal(pesertaList.data.items[0].lokasiMepoFinal, 'Rest Area Subang')
 
-    // 9. SSR HTML checks
+    // 9. SSR HTML & Security Headers checks
     const loginHtml = await req('/admin/login')
     assert.equal(loginHtml.res.status, 200)
     assert.ok(String(loginHtml.data).includes('Merayau Outdoor'))
+    assert.equal(loginHtml.res.headers.get('x-content-type-options'), 'nosniff')
+    assert.equal(loginHtml.res.headers.get('x-frame-options'), 'SAMEORIGIN')
+    assert.ok((loginHtml.res.headers.get('content-security-policy') || '').includes("default-src 'self'"))
 
     const dashHtml = await req('/admin', { headers: authHeaders })
     assert.equal(dashHtml.res.status, 200)
     assert.ok(String(dashHtml.data).includes('Basecamp Merayau Outdoor'))
 
-    console.log('ALL E2E CHECKS PASSED:', {
+    // 10. Defensive Security Controls: CSRF, Safe Image URL, Audit Logs, Session Revocation, Rate Limit
+    const csrfAttempt = await req('/api/admin/kategori', {
+      method: 'POST',
+      headers: {
+        ...authHeaders,
+        'content-type': 'application/json',
+        origin: 'https://evil-attacker.example',
+      },
+      body: JSON.stringify({ namaKategori: 'CSRF Test' }),
+    })
+    assert.equal(csrfAttempt.res.status, 403, 'cross-origin mutation must be rejected with 403')
+
+    const unsafeUrlAttempt = await req('/api/admin/paket-alat', {
+      method: 'POST',
+      headers: { ...authHeaders, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        namaPaket: 'Unsafe URL Test',
+        tarifPaket: 50000,
+        foto: 'javascript:alert(1)',
+        items: [{ idAlat: t1.id, jumlah: 1 }],
+      }),
+    })
+    assert.equal(unsafeUrlAttempt.res.status, 400, 'unsafe image URL scheme must be rejected with 400')
+
+    const auditRes = await req('/api/admin/audit-logs?limit=20', { headers: authHeaders })
+    assert.equal(auditRes.res.status, 200, 'audit logs endpoint should return 200')
+    assert.equal(auditRes.res.headers.get('cache-control'), 'no-store, private')
+    assert.ok(
+      auditRes.data.items.some((e) => e.eventType === 'auth.login_success'),
+      'audit logs must record auth.login_success',
+    )
+    assert.ok(
+      auditRes.data.items.some((e) => e.eventType === 'security.csrf_blocked'),
+      'audit logs must record security.csrf_blocked',
+    )
+
+    const doLogout = await req('/api/auth/logout', {
+      method: 'POST',
+      headers: authHeaders,
+    })
+    assert.equal(doLogout.res.status, 200, 'logout should return 200')
+
+    const replayAfterLogout = await req('/api/admin/dashboard', { headers: authHeaders })
+    assert.equal(
+      replayAfterLogout.res.status,
+      401,
+      'replaying revoked session cookie after logout must fail with 401',
+    )
+
+    let saw429 = false
+    for (let i = 0; i < 6; i++) {
+      const attempt = await req('/api/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          email: 'ratelimit-probe@merayau.id',
+          password: 'wrong-password-probe',
+        }),
+      })
+      if (attempt.res.status === 429) {
+        assert.ok(Number(attempt.res.headers.get('retry-after') || 0) >= 1, '429 must include Retry-After')
+        saw429 = true
+        break
+      }
+    }
+    assert.ok(saw429, 'repeated failed logins must trigger 429 rate limit')
+
+    console.log('ALL E2E & SECURITY CHECKS PASSED:', {
       health: '200',
       authGuard: '401/200',
       uploadVerified: goodUpload.data.url,
+      polyglotBlocked: '400',
+      csrfBlocked: '403',
+      unsafeUrlBlocked: '400',
+      sessionRevocationOnLogout: '401',
+      rateLimit429: 'verified',
+      auditLogsRecorded: auditRes.data.items.length,
       tarifPaketDiskon30: expectedTarif,
       transaksiStockRoundTrip: 'ok',
       tripsAndPeserta: 'ok',
-      ssrHtml: '200',
+      ssrHtmlAndHeaders: '200',
     })
   } finally {
     const conn = await mysql.createConnection({

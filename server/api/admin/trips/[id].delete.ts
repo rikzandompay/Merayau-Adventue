@@ -21,6 +21,14 @@ export default defineEventHandler(async (event) => {
   }
 
   await db.delete(infoTrip).where(eq(infoTrip.id, id))
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.trip_deleted',
+    severity: 'warn',
+    targetType: 'info_trip',
+    targetId: id,
+    metadata: { kodeTrip: existing.kodeTrip, judul: existing.judul },
+  })
   return { ok: true }
 })
 

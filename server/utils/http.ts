@@ -1,6 +1,56 @@
 import { randomBytes } from 'node:crypto'
 import type { H3Event } from 'h3'
-import type { z } from 'zod'
+import { z } from 'zod'
+
+const SAFE_LOCAL_MEDIA_RE = /^\/(?:uploads|images)\/[a-zA-Z0-9._/-]+\.(?:jpg|jpeg|png|webp|svg|avif)(?:\?v=[a-zA-Z0-9._-]+)?$/
+
+export function isSafeMediaUrl(raw: string): boolean {
+  const val = raw.trim()
+  if (!val) return false
+  if (val.includes('..') || val.includes('\\') || val.startsWith('//')) return false
+  if (/[\x00-\x1F\x7F]/.test(val)) return false
+
+  if (val.startsWith('/')) {
+    return SAFE_LOCAL_MEDIA_RE.test(val)
+  }
+
+  try {
+    const parsed = new URL(val)
+    if (parsed.protocol !== 'https:') return false
+    if (parsed.username || parsed.password) return false
+    const host = parsed.hostname.toLowerCase()
+    return (
+      host.endsWith('.public.blob.vercel-storage.com') ||
+      host.endsWith('.vercel-storage.com')
+    )
+  } catch {
+    return false
+  }
+}
+
+export function safeRequiredImageUrlSchema(maxLen = 500) {
+  return z
+    .string()
+    .trim()
+    .min(1, 'URL gambar wajib diisi.')
+    .max(maxLen, `URL gambar maksimal ${maxLen} karakter.`)
+    .refine(isSafeMediaUrl, {
+      message: 'URL gambar harus berasal dari upload resmi (/uploads, /images, atau Vercel Blob HTTPS).',
+    })
+}
+
+export function safeOptionalImageUrlSchema(maxLen = 255) {
+  return z
+    .string()
+    .trim()
+    .max(maxLen, `URL gambar maksimal ${maxLen} karakter.`)
+    .transform((v) => (v === '' ? null : v))
+    .nullable()
+    .optional()
+    .refine((v) => v === null || v === undefined || isSafeMediaUrl(v), {
+      message: 'URL gambar harus berasal dari upload resmi (/uploads, /images, atau Vercel Blob HTTPS).',
+    })
+}
 
 export function generateUniqueKode(prefix: string): string {
   const ts = Date.now().toString(36).slice(-5).toUpperCase()
@@ -52,4 +102,3 @@ export function rethrowDbConflict(error: unknown, duplicateMsg: string, fkMsg?: 
   }
   throw error
 }
-

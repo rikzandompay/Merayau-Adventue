@@ -138,8 +138,12 @@ async function submitPassword() {
     passwordErr.value = 'Kata sandi saat ini wajib diisi.'
     return
   }
-  if (passwordForm.newPassword.length < 6) {
-    passwordErr.value = 'Kata sandi baru minimal 6 karakter.'
+  if (passwordForm.newPassword.length < 12) {
+    passwordErr.value = 'Kata sandi baru minimal 12 karakter.'
+    return
+  }
+  if (!/[a-zA-Z]/.test(passwordForm.newPassword) || !/\d/.test(passwordForm.newPassword)) {
+    passwordErr.value = 'Kata sandi baru wajib mengandung kombinasi huruf dan angka.'
     return
   }
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -245,7 +249,7 @@ onBeforeUnmount(() => {
               class="ed-input !min-h-[44px] sm:!min-h-[40px]"
             />
             <p class="mt-1 text-[11px]" style="color: var(--srf-ink-3)">
-              Dipakai untuk login panel admin dan ditampilkan sebagai email resmi di footer publik.
+              Dipakai khusus untuk login panel admin (terpisah dari email kontak publik di footer).
             </p>
           </div>
 
@@ -351,7 +355,7 @@ onBeforeUnmount(() => {
             Ganti Kata Sandi Akun
           </h2>
           <p class="mt-1 text-xs leading-relaxed" style="color: var(--srf-ink-3)">
-            Gunakan minimal 6 karakter. Setelah diganti, gunakan kata sandi baru saat login berikutnya.
+            Gunakan minimal 12 karakter (kombinasi huruf dan angka). Mengganti sandi otomatis mencabut sesi perangkat lain.
           </p>
         </div>
 
@@ -389,8 +393,8 @@ onBeforeUnmount(() => {
                 :type="showNewPw ? 'text' : 'password'"
                 autocomplete="new-password"
                 required
-                minlength="6"
-                placeholder="Minimal 6 karakter"
+                minlength="12"
+                placeholder="Minimal 12 karakter (huruf & angka)"
                 class="ed-input !min-h-[44px] !pr-20 sm:!min-h-[40px]"
               />
               <button
@@ -414,7 +418,7 @@ onBeforeUnmount(() => {
                 :type="showConfirmPw ? 'text' : 'password'"
                 autocomplete="new-password"
                 required
-                minlength="6"
+                minlength="12"
                 placeholder="Ulangi kata sandi baru"
                 class="ed-input !min-h-[44px] !pr-20 sm:!min-h-[40px]"
               />

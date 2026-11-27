@@ -16,14 +16,20 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Path berkas tidak valid.' })
   }
 
+  const mime = MIME_BY_EXT[extname(target).toLowerCase()]
+  if (!mime) {
+    throw createError({ statusCode: 404, statusMessage: 'Gambar tidak ditemukan.' })
+  }
+
   try {
     const data = await readFile(target)
-    const mime = MIME_BY_EXT[extname(target).toLowerCase()] || 'application/octet-stream'
     setHeader(event, 'Content-Type', mime)
+    setHeader(event, 'X-Content-Type-Options', 'nosniff')
+    setHeader(event, 'Content-Security-Policy', "default-src 'none'; sandbox")
+    setHeader(event, 'Cross-Origin-Resource-Policy', 'same-origin')
     setHeader(event, 'Cache-Control', 'public, max-age=3600')
     return data
   } catch {
     throw createError({ statusCode: 404, statusMessage: 'Gambar tidak ditemukan.' })
   }
 })
-

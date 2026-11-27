@@ -73,6 +73,18 @@ export default defineEventHandler(async (event) => {
     return row
   })
 
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.transaksi_returned',
+    severity: 'info',
+    targetType: 'transaksi_sewa',
+    targetId: id,
+    metadata: {
+      dendaTelat: updated?.dendaTelat,
+      dendaRusak: updated?.dendaRusak,
+    },
+  })
+
   return updated
 })
 

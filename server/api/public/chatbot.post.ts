@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const MAX_CHATBOT_BODY_BYTES = 16 * 1024
+
 const chatbotRequestSchema = z.object({
   message: z
     .string()
@@ -8,10 +10,10 @@ const chatbotRequestSchema = z.object({
     .max(400, 'Pesan maksimal 400 karakter.'),
   cart: z
     .object({
-      alatCount: z.number().int().min(0).default(0),
-      paketCount: z.number().int().min(0).default(0),
+      alatCount: z.number().int().min(0).max(500).default(0),
+      paketCount: z.number().int().min(0).max(100).default(0),
       durasiHari: z.number().int().min(1).max(30).default(2),
-      grandTotal: z.number().min(0).default(0),
+      grandTotal: z.number().min(0).max(500_000_000).default(0),
     })
     .optional(),
   context: z
@@ -26,14 +28,39 @@ const chatbotRequestSchema = z.object({
     .array(
       z.object({
         role: z.enum(['user', 'bot']),
-        text: z.string().trim().min(1).max(1200),
+        text: z.string().trim().min(1).max(600),
       }),
     )
-    .max(12)
+    .max(8)
     .optional(),
 })
 
 export default defineEventHandler(async (event) => {
+  const ip = getClientIp(event)
+  try {
+    enforceRateLimit(event, {
+      namespace: 'public-chatbot',
+      key: ip,
+      max: 20,
+      windowSec: 60,
+      message: 'Terlalu banyak pesan dalam waktu singkat. Tunggu sebentar lalu kirim lagi.',
+    })
+  } catch (err) {
+    await recordSecurityAudit(event, {
+      eventType: 'public.chatbot_rate_limited',
+      severity: 'warn',
+    })
+    throw err
+  }
+
+  const contentLength = Number(getRequestHeader(event, 'content-length') || 0)
+  if (contentLength > MAX_CHATBOT_BODY_BYTES) {
+    throw createError({
+      statusCode: 413,
+      statusMessage: 'Ukuran pesan terlalu besar.',
+    })
+  }
+
   const rawBody = await readBody(event).catch(() => null)
   const parsed = chatbotRequestSchema.safeParse(rawBody)
 
@@ -76,4 +103,3 @@ export default defineEventHandler(async (event) => {
     source: 'local' as const,
   }
 })
-

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { login } = useAdminAuth()
-const email = ref('admin@merayau.id')
+const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMsg = ref('')

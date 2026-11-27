@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { infoTrip } from '../../../../database/schema'
 
 const updateGallerySchema = z.object({
-  foto: z.string().trim().max(500).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(500),
   galleryItems: z.array(tripGalleryItemSchema).max(5),
 })
 
@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  invalidateChatbotSnapshotCache()
   return updated
 })
 

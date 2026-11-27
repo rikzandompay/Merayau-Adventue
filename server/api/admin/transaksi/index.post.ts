@@ -312,6 +312,18 @@ export default defineEventHandler(async (event) => {
     return row
   })
 
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.transaksi_created',
+    severity: 'info',
+    targetType: 'transaksi_sewa',
+    targetId: created?.id,
+    metadata: {
+      kodeSewa: created?.kodeSewa,
+      totalBiayaSewa: created?.totalBiayaSewa,
+    },
+  })
+
   setResponseStatus(event, 201)
   return created
 })

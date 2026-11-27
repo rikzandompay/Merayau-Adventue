@@ -1,9 +1,9 @@
 import { asc } from 'drizzle-orm'
 import { admins } from '../database/schema'
-import { getPool, useDb } from './db'
+import { useDb } from './db'
 
 export const DEFAULT_CONTACT_WHATSAPP = '6285156549003'
-export const DEFAULT_CONTACT_EMAIL = 'admin@merayau.id'
+export const DEFAULT_CONTACT_EMAIL = 'halo@merayau.id'
 
 export function normalizeWhatsappNumber(raw: string): string {
   const digits = String(raw || '').replace(/\D/g, '')
@@ -34,37 +34,13 @@ export function formatWhatsappDisplay(rawOrNormalized: string): string {
   return `+${normalized}`
 }
 
-let ensurePhoneColumnPromise: Promise<void> | null = null
-
-export async function ensureAdminPhoneColumn(): Promise<void> {
-  if (!ensurePhoneColumnPromise) {
-    ensurePhoneColumnPromise = (async () => {
-      const pool = getPool()
-      const [cols] = await pool.query<Array<{ Field: string }>>(
-        "SHOW COLUMNS FROM `admins` LIKE 'no_telepon'",
-      )
-      if (!Array.isArray(cols) || cols.length === 0) {
-        try {
-          await pool.query(
-            'ALTER TABLE `admins` ADD COLUMN `no_telepon` varchar(30) DEFAULT NULL AFTER `email`',
-          )
-        } catch (err: unknown) {
-          const e = err as { code?: string; errno?: number }
-          if (e?.code !== 'ER_DUP_FIELDNAME' && e?.errno !== 1060) {
-            throw err
-          }
-        }
-        await pool.query(
-          "UPDATE `admins` SET `no_telepon` = ? WHERE `no_telepon` IS NULL OR TRIM(`no_telepon`) = ''",
-          [DEFAULT_CONTACT_WHATSAPP],
-        )
-      }
-    })().catch((err) => {
-      ensurePhoneColumnPromise = null
-      throw err
-    })
+function resolveConfiguredPublicEmail(): string {
+  try {
+    const cfg = useRuntimeConfig()
+    return String(cfg.publicContactEmail || process.env.PUBLIC_CONTACT_EMAIL || '').trim()
+  } catch {
+    return String(process.env.PUBLIC_CONTACT_EMAIL || '').trim()
   }
-  return ensurePhoneColumnPromise
 }
 
 export async function getPrimaryAdminContact(): Promise<{
@@ -72,12 +48,12 @@ export async function getPrimaryAdminContact(): Promise<{
   whatsappDisplay: string
   email: string
 }> {
+  const publicEmailOverride = resolveConfiguredPublicEmail()
+
   try {
-    await ensureAdminPhoneColumn()
     const db = useDb()
     const [primaryAdmin] = await db
       .select({
-        email: admins.email,
         noTelepon: admins.noTelepon,
       })
       .from(admins)
@@ -91,14 +67,13 @@ export async function getPrimaryAdminContact(): Promise<{
     return {
       whatsapp,
       whatsappDisplay: formatWhatsappDisplay(whatsapp),
-      email: primaryAdmin?.email?.trim() || DEFAULT_CONTACT_EMAIL,
+      email: publicEmailOverride || DEFAULT_CONTACT_EMAIL,
     }
-  } catch (err) {
-    console.warn('[contact] Failed to resolve primary admin contact, using default:', err)
+  } catch {
     return {
       whatsapp: DEFAULT_CONTACT_WHATSAPP,
       whatsappDisplay: formatWhatsappDisplay(DEFAULT_CONTACT_WHATSAPP),
-      email: DEFAULT_CONTACT_EMAIL,
+      email: publicEmailOverride || DEFAULT_CONTACT_EMAIL,
     }
   }
 }

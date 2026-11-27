@@ -31,6 +31,17 @@ export default defineEventHandler(async (event) => {
     .from(pengaturanSewa)
     .where(eq(pengaturanSewa.id, rule.id))
     .limit(1)
+
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.settings_updated',
+    severity: 'warn',
+    targetType: 'pengaturan_sewa',
+    targetId: rule.id,
+    metadata: body,
+    notify: true,
+  })
+
   return updated
 })
 

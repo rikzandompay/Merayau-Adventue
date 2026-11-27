@@ -28,6 +28,7 @@ export default defineEventHandler(async () => {
     const standing = telatCount > 0 ? 'Telat Aktif' : disewaCount > 0 ? 'Sedang Sewa' : 'Tepat Waktu'
     return {
       ...c,
+      noIdentitasMasked: maskIdentityNumber(c.noIdentitas),
       totalTransaksi: rows.length,
       telatCount,
       disewaCount,

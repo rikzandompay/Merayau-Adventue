@@ -8,7 +8,7 @@ const paketPayloadSchema = z.object({
   tipePaket: z.enum(['paket', 'bundle']).default('paket'),
   deskripsi: z.string().trim().max(500).nullable().optional(),
   labelPromo: z.string().trim().max(60).nullable().optional(),
-  foto: z.string().trim().max(255).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(255),
   diskonPersen: z.coerce.number().int().min(0).max(95).default(0),
   tarifPaket: z.coerce.number().int().min(1, 'Tarif paket wajib diisi lebih dari 0.').max(100_000_000),
   statusAktif: z.boolean().default(true),
@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
     })
 
     const [created] = await db.select().from(paketAlat).where(eq(paketAlat.id, createdId)).limit(1)
+    invalidateChatbotSnapshotCache()
     setResponseStatus(event, 201)
     return created
   } catch (err) {

@@ -143,6 +143,13 @@ const BASECAMP_INFO = {
   jamBuka: 'Setiap Hari, 08.00 - 21.00 WIB',
 }
 
+const SNAPSHOT_CACHE_TTL_MS = 30_000
+let snapshotCache: { data: ChatbotCatalogSnapshot; expiresAt: number } | null = null
+
+export function invalidateChatbotSnapshotCache(): void {
+  snapshotCache = null
+}
+
 function formatRupiahServer(amount: number): string {
   return `Rp ${Math.round(amount).toLocaleString('id-ID')}`
 }
@@ -185,6 +192,11 @@ function resolveTripPhoto(
 }
 
 export async function loadChatbotCatalogSnapshot(): Promise<ChatbotCatalogSnapshot> {
+  const cachedNow = Date.now()
+  if (snapshotCache && snapshotCache.expiresAt > cachedNow) {
+    return snapshotCache.data
+  }
+
   const db = useDb()
 
   const [
@@ -370,7 +382,7 @@ export async function loadChatbotCatalogSnapshot(): Promise<ChatbotCatalogSnapsh
     targetTipe: p.targetTipe,
   }))
 
-  return {
+  const result: ChatbotCatalogSnapshot = {
     alat: activeAlat,
     categories,
     packages,
@@ -384,6 +396,11 @@ export async function loadChatbotCatalogSnapshot(): Promise<ChatbotCatalogSnapsh
       ...BASECAMP_INFO,
     },
   }
+  snapshotCache = {
+    data: result,
+    expiresAt: Date.now() + SNAPSHOT_CACHE_TTL_MS,
+  }
+  return result
 }
 
 const SYNONYM_REPLACEMENTS: Array<[RegExp, string]> = [

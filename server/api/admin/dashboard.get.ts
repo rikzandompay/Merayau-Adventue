@@ -1,4 +1,4 @@
-import { asc, count, desc, eq } from 'drizzle-orm'
+import { asc, count, desc, eq, gte, inArray, or, sql } from 'drizzle-orm'
 import {
   detailSewa,
   kategoriAlat,
@@ -27,58 +27,87 @@ export default defineEventHandler(async (event) => {
   const periodStart = new Date(now.getTime() - days * 86_400_000)
   const prevStart = new Date(periodStart.getTime() - days * 86_400_000)
 
-  const [allRentals, allDetails, allAlat, rentedMap, pesertaCountRows] = await Promise.all([
-    db
-      .select({
-        id: transaksiSewa.id,
-        idPenyewa: transaksiSewa.idPenyewa,
-        kodeSewa: transaksiSewa.kodeSewa,
-        penyewaNama: penyewa.nama,
-        penyewaAlamat: penyewa.alamat,
-        tanggalPinjam: transaksiSewa.tanggalPinjam,
-        tanggalKembaliRencana: transaksiSewa.tanggalKembaliRencana,
-        durasiHari: transaksiSewa.durasiHari,
-        subtotal: transaksiSewa.subtotal,
-        diskonNominal: transaksiSewa.diskonNominal,
-        totalBiayaSewa: transaksiSewa.totalBiayaSewa,
-        dendaTelat: transaksiSewa.dendaTelat,
-        dendaRusak: transaksiSewa.dendaRusak,
-        statusSewa: transaksiSewa.statusSewa,
-      })
-      .from(transaksiSewa)
-      .innerJoin(penyewa, eq(transaksiSewa.idPenyewa, penyewa.id))
-      .orderBy(desc(transaksiSewa.tanggalPinjam)),
-    db
-      .select({
-        idSewa: detailSewa.idSewa,
-        idAlat: detailSewa.idAlat,
-        idPaket: detailSewa.idPaket,
-        jumlah: detailSewa.jumlah,
-        subtotalItem: detailSewa.subtotalItem,
-        kodeAlat: masterAlat.kodeAlat,
-        namaAlat: masterAlat.namaAlat,
-        foto: masterAlat.foto,
-        namaKategori: kategoriAlat.namaKategori,
-      })
-      .from(detailSewa)
-      .innerJoin(masterAlat, eq(detailSewa.idAlat, masterAlat.id))
-      .innerJoin(kategoriAlat, eq(masterAlat.idKategori, kategoriAlat.id)),
-    db
-      .select({
-        id: masterAlat.id,
-        kodeAlat: masterAlat.kodeAlat,
-        namaAlat: masterAlat.namaAlat,
-        foto: masterAlat.foto,
-        namaKategori: kategoriAlat.namaKategori,
-        stokTotal: masterAlat.stokTotal,
-        statusAktif: masterAlat.statusAktif,
-      })
-      .from(masterAlat)
-      .innerJoin(kategoriAlat, eq(masterAlat.idKategori, kategoriAlat.id))
-      .orderBy(asc(masterAlat.id)),
-    getActiveRentedMap(db),
-    db.select({ total: count() }).from(pesertaTrip),
-  ])
+  const [windowRentals, allAlat, rentedMap, pesertaCountRows, customerStatsRows, weekdayRows] =
+    await Promise.all([
+      db
+        .select({
+          id: transaksiSewa.id,
+          idPenyewa: transaksiSewa.idPenyewa,
+          kodeSewa: transaksiSewa.kodeSewa,
+          penyewaNama: penyewa.nama,
+          penyewaAlamat: penyewa.alamat,
+          tanggalPinjam: transaksiSewa.tanggalPinjam,
+          tanggalKembaliRencana: transaksiSewa.tanggalKembaliRencana,
+          durasiHari: transaksiSewa.durasiHari,
+          subtotal: transaksiSewa.subtotal,
+          diskonNominal: transaksiSewa.diskonNominal,
+          totalBiayaSewa: transaksiSewa.totalBiayaSewa,
+          dendaTelat: transaksiSewa.dendaTelat,
+          dendaRusak: transaksiSewa.dendaRusak,
+          statusSewa: transaksiSewa.statusSewa,
+        })
+        .from(transaksiSewa)
+        .innerJoin(penyewa, eq(transaksiSewa.idPenyewa, penyewa.id))
+        .where(
+          or(
+            gte(transaksiSewa.tanggalPinjam, prevStart),
+            inArray(transaksiSewa.statusSewa, ['Disewa', 'Terlambat']),
+          ),
+        )
+        .orderBy(desc(transaksiSewa.tanggalPinjam)),
+      db
+        .select({
+          id: masterAlat.id,
+          kodeAlat: masterAlat.kodeAlat,
+          namaAlat: masterAlat.namaAlat,
+          foto: masterAlat.foto,
+          namaKategori: kategoriAlat.namaKategori,
+          stokTotal: masterAlat.stokTotal,
+          statusAktif: masterAlat.statusAktif,
+        })
+        .from(masterAlat)
+        .innerJoin(kategoriAlat, eq(masterAlat.idKategori, kategoriAlat.id))
+        .orderBy(asc(masterAlat.id)),
+      getActiveRentedMap(db),
+      db.select({ total: count() }).from(pesertaTrip),
+      db
+        .select({
+          idPenyewa: transaksiSewa.idPenyewa,
+          txCount: count(),
+        })
+        .from(transaksiSewa)
+        .groupBy(transaksiSewa.idPenyewa),
+      db
+        .select({
+          dow: sql<number>`DAYOFWEEK(${transaksiSewa.tanggalPinjam})`,
+          cnt: count(),
+        })
+        .from(transaksiSewa)
+        .groupBy(sql`DAYOFWEEK(${transaksiSewa.tanggalPinjam})`),
+    ])
+
+  const windowIds = windowRentals.map((r) => r.id)
+  const windowDetails = windowIds.length
+    ? await db
+        .select({
+          idSewa: detailSewa.idSewa,
+          idAlat: detailSewa.idAlat,
+          idPaket: detailSewa.idPaket,
+          jumlah: detailSewa.jumlah,
+          subtotalItem: detailSewa.subtotalItem,
+          kodeAlat: masterAlat.kodeAlat,
+          namaAlat: masterAlat.namaAlat,
+          foto: masterAlat.foto,
+          namaKategori: kategoriAlat.namaKategori,
+        })
+        .from(detailSewa)
+        .innerJoin(masterAlat, eq(detailSewa.idAlat, masterAlat.id))
+        .innerJoin(kategoriAlat, eq(masterAlat.idKategori, kategoriAlat.id))
+        .where(inArray(detailSewa.idSewa, windowIds))
+    : []
+
+  const allRentals = windowRentals
+  const allDetails = windowDetails
 
   const detailsBySewa = new Map<number, typeof allDetails>()
   for (const d of allDetails) {
@@ -206,9 +235,10 @@ export default defineEventHandler(async (event) => {
 
   const weekdayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
   const weekdayCounts = [0, 0, 0, 0, 0, 0, 0]
-  for (const r of allRentals) {
-    const dayIdx = new Date(r.tanggalPinjam).getDay()
-    if (dayIdx >= 0 && dayIdx <= 6) weekdayCounts[dayIdx] = (weekdayCounts[dayIdx] ?? 0) + 1
+  for (const row of weekdayRows) {
+    // MySQL DAYOFWEEK returns 1=Sunday .. 7=Saturday
+    const dayIdx = Number(row.dow) - 1
+    if (dayIdx >= 0 && dayIdx <= 6) weekdayCounts[dayIdx] = Number(row.cnt)
   }
   const weekdayActivity = weekdayLabels.map((label, idx) => ({
     label,
@@ -222,12 +252,8 @@ export default defineEventHandler(async (event) => {
     { key: 'trip', label: 'Peserta Trip', count: totalPesertaTrip, amount: 0, color: 'orange' },
   ]
 
-  const customerTxCounts = new Map<number, number>()
-  for (const r of allRentals) {
-    customerTxCounts.set(r.idPenyewa, (customerTxCounts.get(r.idPenyewa) ?? 0) + 1)
-  }
-  const totalCustomerCount = customerTxCounts.size
-  const repeatCustomerCount = [...customerTxCounts.values()].filter((c) => c >= 2).length
+  const totalCustomerCount = customerStatsRows.length
+  const repeatCustomerCount = customerStatsRows.filter((c) => Number(c.txCount) >= 2).length
   const repeatCustomerPct =
     totalCustomerCount > 0 ? Math.round((repeatCustomerCount / totalCustomerCount) * 100) : 0
   const stockReadyPct =

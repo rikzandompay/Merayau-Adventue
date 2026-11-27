@@ -9,7 +9,6 @@ const updateProfileSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await ensureAdminPhoneColumn()
   const adminId = event.context.admin?.id as number
   const body = await parseValidatedBody(event, updateProfileSchema)
 
@@ -24,6 +23,15 @@ export default defineEventHandler(async (event) => {
 
   const db = useDb()
   const emailClean = body.email.toLowerCase()
+
+  const [before] = await db
+    .select({
+      email: admins.email,
+      noTelepon: admins.noTelepon,
+    })
+    .from(admins)
+    .where(eq(admins.id, adminId))
+    .limit(1)
 
   try {
     await db
@@ -43,8 +51,9 @@ export default defineEventHandler(async (event) => {
       id: admins.id,
       nama: admins.nama,
       email: admins.email,
-      noTelepon: admins.noTelepon,
+      noTelepon: updatedPhoneSelect(),
       role: admins.role,
+      tokenVersion: admins.tokenVersion,
       createdAt: admins.createdAt,
     })
     .from(admins)
@@ -63,7 +72,26 @@ export default defineEventHandler(async (event) => {
     email: updated.email,
     nama: updated.nama,
     role: updated.role,
+    ver: updated.tokenVersion,
   })
+
+  const contactChanged = before?.email !== updated.email || before?.noTelepon !== normalized
+  await recordSecurityAudit(event, {
+    eventType: 'admin.profile_updated',
+    severity: contactChanged ? 'warn' : 'info',
+    adminId: updated.id,
+    actorEmail: updated.email,
+    targetType: 'admin',
+    targetId: updated.id,
+    metadata: {
+      emailChanged: before?.email !== updated.email,
+      phoneChanged: before?.noTelepon !== normalized,
+      whatsappNormalized: normalized,
+    },
+    notify: contactChanged,
+  })
+
+  invalidateChatbotSnapshotCache()
 
   return {
     ok: true,
@@ -80,3 +108,6 @@ export default defineEventHandler(async (event) => {
   }
 })
 
+function updatedPhoneSelect() {
+  return admins.noTelepon
+}

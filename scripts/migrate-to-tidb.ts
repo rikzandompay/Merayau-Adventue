@@ -21,8 +21,10 @@ const CREATE_TABLE_STATEMENTS = [
     id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     nama VARCHAR(120) NOT NULL,
     email VARCHAR(160) NOT NULL,
+    no_telepon VARCHAR(30) NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(30) NOT NULL DEFAULT 'admin',
+    token_version INT UNSIGNED NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_admins_email (email)
   )`,
@@ -280,6 +282,12 @@ async function uploadLocalMediaIfNeeded(
 }
 
 async function main() {
+  if (!process.argv.includes('--confirm-overwrite')) {
+    throw new Error(
+      'Skrip ini menimpa tabel target TiDB Cloud. Jalankan `npm run db:backup` terlebih dahulu, lalu tambahkan flag --confirm-overwrite.',
+    )
+  }
+
   const targetUrl = String(process.env.TARGET_DATABASE_URL || '').trim()
   if (!targetUrl) {
     throw new Error('TARGET_DATABASE_URL is required (TiDB Cloud MySQL connection URL).')

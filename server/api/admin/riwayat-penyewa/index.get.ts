@@ -15,6 +15,12 @@ export default defineEventHandler(async () => {
     terlambat: items.filter((r) => r.statusKetepatan === 'Terlambat').length,
   }
 
-  return { items, kpis }
+  return {
+    items: items.map((r) => ({
+      ...r,
+      noIdentitasMasked: maskIdentityNumber(r.noIdentitas),
+    })),
+    kpis,
+  }
 })
 

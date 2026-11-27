@@ -10,7 +10,7 @@ const createAlatSchema = z.object({
   hargaHarian: z.coerce.number().int().min(1000).max(50_000_000),
   stokTotal: z.coerce.number().int().min(0).max(10_000),
   kondisi: z.string().trim().min(2).max(60).default('Baik'),
-  foto: z.string().trim().max(255).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(255),
   statusAktif: z.boolean().default(true),
 })
 
@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
       .from(masterAlat)
       .where(eq(masterAlat.id, Number(res.insertId)))
       .limit(1)
+    invalidateChatbotSnapshotCache()
     setResponseStatus(event, 201)
     return { ...created, namaKategori: cat.namaKategori, stokDisewa: 0, stokTersedia: created!.stokTotal }
   } catch (err) {

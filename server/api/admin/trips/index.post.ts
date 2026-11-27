@@ -9,7 +9,7 @@ const tripSchema = z.object({
   tanggalBerangkat: z.string().trim().max(80).optional().default('Jadwal Fleksibel'),
   durasi: z.string().trim().min(1).max(60).default('2D1N'),
   kuota: z.coerce.number().int().min(1).max(500).default(20),
-  foto: z.string().trim().max(500).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(500),
   itinerary: z.string().trim().max(5000).optional(),
   detail: tripDetailSchema.optional(),
   statusPublish: z.enum(['Published', 'Draft', 'Penuh']).default('Draft'),
@@ -70,6 +70,7 @@ export default defineEventHandler(async (event) => {
     })
 
     const [created] = await db.select().from(infoTrip).where(eq(infoTrip.id, tripId)).limit(1)
+    invalidateChatbotSnapshotCache()
     setResponseStatus(event, 201)
     return created
   } catch (err) {

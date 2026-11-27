@@ -31,6 +31,8 @@ function resolveDbConfig() {
   }
 }
 
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1'])
+
 export function shouldUseSsl(
   host: string,
   port: number,
@@ -40,10 +42,15 @@ export function shouldUseSsl(
   const flag = sslFlag.trim().toLowerCase()
   if (flag === 'false' || flag === '0') return false
   if (flag === 'true' || flag === '1') return true
-  if (host.toLowerCase().includes('tidbcloud.com')) return true
+  const hostLower = host.trim().toLowerCase()
+  if (hostLower.includes('tidbcloud.com')) return true
   if (port === 4000) return true
   const urlLower = rawUrl.toLowerCase()
-  return urlLower.includes('tidbcloud.com') || urlLower.includes('ssl=')
+  if (urlLower.includes('tidbcloud.com') || urlLower.includes('ssl=')) return true
+  if (process.env.NODE_ENV === 'production' && hostLower && !LOOPBACK_HOSTS.has(hostLower)) {
+    return true
+  }
+  return false
 }
 
 export function buildPoolOptionsFromEnv(): mysql.PoolOptions {

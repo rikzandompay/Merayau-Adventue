@@ -9,7 +9,7 @@ const updateAlatSchema = z.object({
   hargaHarian: z.coerce.number().int().min(1000).max(50_000_000),
   stokTotal: z.coerce.number().int().min(0).max(10_000),
   kondisi: z.string().trim().min(2).max(60).optional(),
-  foto: z.string().trim().max(255).nullable().optional(),
+  foto: safeOptionalImageUrlSchema(255),
   statusAktif: z.boolean(),
 })
 
@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
     .where(eq(masterAlat.id, id))
 
   const [updated] = await db.select().from(masterAlat).where(eq(masterAlat.id, id)).limit(1)
+  invalidateChatbotSnapshotCache()
   return {
     ...updated,
     stokDisewa: activeRented,

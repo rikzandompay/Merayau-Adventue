@@ -17,6 +17,14 @@ export default defineEventHandler(async (event) => {
   if (Number(rentalRefs?.total ?? 0) > 0 || Number(pkgRefs?.total ?? 0) > 0) {
     // Preserve historical transaction/package integrity using soft-disable instead of hard delete.
     await db.update(masterAlat).set({ statusAktif: false }).where(eq(masterAlat.id, id))
+    invalidateChatbotSnapshotCache()
+    await recordSecurityAudit(event, {
+      eventType: 'admin.alat_soft_disabled',
+      severity: 'info',
+      targetType: 'master_alat',
+      targetId: id,
+      metadata: { kodeAlat: existing.kodeAlat },
+    })
     return {
       ok: true,
       softDisabled: true,
@@ -25,6 +33,14 @@ export default defineEventHandler(async (event) => {
   }
 
   await db.delete(masterAlat).where(eq(masterAlat.id, id))
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.alat_deleted',
+    severity: 'warn',
+    targetType: 'master_alat',
+    targetId: id,
+    metadata: { kodeAlat: existing.kodeAlat },
+  })
   return { ok: true, softDisabled: false }
 })
 

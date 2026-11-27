@@ -73,6 +73,20 @@ export default defineEventHandler(async (event) => {
     .from(promoDiskon)
     .where(eq(promoDiskon.id, Number(ins.insertId)))
     .limit(1)
+
+  invalidateChatbotSnapshotCache()
+  await recordSecurityAudit(event, {
+    eventType: 'admin.promo_created',
+    severity: 'info',
+    targetType: 'promo_diskon',
+    targetId: created?.id,
+    metadata: {
+      namaPromo: body.namaPromo,
+      tipePotongan: body.tipePotongan,
+      nilaiPotongan: body.nilaiPotongan,
+    },
+  })
+
   setResponseStatus(event, 201)
   return created
 })

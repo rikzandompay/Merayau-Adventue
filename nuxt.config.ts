@@ -30,7 +30,7 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    authSecret: process.env.AUTH_SECRET || 'dev-merayau-secret',
+    authSecret: process.env.AUTH_SECRET || '',
     databaseUrl: process.env.DATABASE_URL || '',
     dbHost: process.env.DB_HOST || '127.0.0.1',
     dbPort: Number(process.env.DB_PORT || 3307),
@@ -41,5 +41,7 @@ export default defineNuxtConfig({
     blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+    publicContactEmail: process.env.PUBLIC_CONTACT_EMAIL || '',
+    securityAlertWebhookUrl: process.env.SECURITY_ALERT_WEBHOOK_URL || '',
   },
 })

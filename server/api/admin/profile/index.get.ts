@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm'
 import { admins } from '../../../database/schema'
 
 export default defineEventHandler(async (event) => {
-  await ensureAdminPhoneColumn()
   const adminId = event.context.admin?.id as number
   const db = useDb()
 
@@ -44,4 +43,3 @@ export default defineEventHandler(async (event) => {
     },
   }
 })
-
